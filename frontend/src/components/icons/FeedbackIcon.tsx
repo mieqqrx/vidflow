@@ -1,0 +1,34 @@
+import { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
+
+interface IconProps extends ComponentProps<"svg"> {
+    filled?: boolean;
+}
+
+export const FeedbackIcon = ({ className, filled, ...props }: IconProps) => {
+    return (
+        <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className={cn("w-6 h-6", className)}
+            {...props}
+        >
+            <g clipPath="url(#clip0_153_768)">
+                <path
+                    d="M13 14H11V12H13V14ZM13 5H11V11H13V5ZM19 3H5V19.59L8.29 16.3L8.59 16H9H19V3ZM20 2V17H9L4 22V2H20Z"
+                    fill="white"
+                    stroke="currentColor"
+                    strokeWidth={filled ? "0" : "1.5"}
+                />
+            </g>
+            <defs>
+                <clipPath id="clip0_153_768">
+                    <rect width="24" height="24" fill="white"/>
+                </clipPath>
+            </defs>
+        </svg>
+    );
+};
