@@ -18,9 +18,9 @@ export const LibraryIcon = ({ className, filled, ...props }: IconProps) => {
         >
             <path
                 d="M11 7L17 10.5L11 14V7ZM18 20H4V6H3V21H18V20ZM21 18H6V3H21V18ZM7 17H20V4H7V17Z"
-                fill="white"
-                stroke="currentColor"
-                strokeWidth={filled ? "0" : "1.5"}
+                fill="#EEEEEE"
+                stroke="#EEEEEE"
+                strokeWidth={filled ? "0" : "1"}
             />
         </svg>
     );

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useRegisterMutation } from "@/store/api/apiSlice";
+import { useRegisterMutation } from "@/store/api";
 import { registerSchema, RegisterFormValues } from "@/lib/validation/auth";
 
 export const useRegisterForm = () => {

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { X, Shuffle, Repeat, ChevronDown } from "lucide-react";
-import { useGetPlaylistByIdQuery } from "@/store/api/apiSlice";
+import { useGetPlaylistByIdQuery } from "@/store/api";
 import { PlaylistVideoItem } from "@/types";
 
 interface PlaylistSidebarPanelProps {

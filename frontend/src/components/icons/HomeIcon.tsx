@@ -19,14 +19,12 @@ export const HomeIcon = ({ className, filled, ...props }: IconProps) => {
             <g clipPath="url(#clip0_153_400)">
                 <path
                     d="M4 10V21H10V15H14V21H20V10L12 3L4 10Z"
-                    fill="white"
-                    stroke="currentColor"
-                    strokeWidth={filled ? "0" : "1.5"}
+                    fill="#EEEEEE"
                 />
             </g>
             <defs>
                 <clipPath id="clip0_153_400">
-                    <rect width="24" height="24" fill="white"/>
+                    <rect width="24" height="24" fill="#EEEEEE"/>
                 </clipPath>
             </defs>
         </svg>

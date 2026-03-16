@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useGetMeQuery, useUpdateNotificationSettingsMutation } from "@/store/api/apiSlice";
+import { useGetMeQuery, useUpdateUserSettingsMutation } from "@/store/api";
 
 const ToggleSwitch = ({ checked, onChange, disabled }: { checked: boolean, onChange: () => void, disabled?: boolean }) => (
     <button
@@ -26,13 +26,16 @@ const ToggleSwitch = ({ checked, onChange, disabled }: { checked: boolean, onCha
 
 export default function NotificationsSettingsPage() {
     const { data: user, isLoading } = useGetMeQuery();
-    const [updateSettings] = useUpdateNotificationSettingsMutation();
 
+    const [updateSettings] = useUpdateUserSettingsMutation();
+
+    // Добавили настройку для Live Stream
     const [settings, setSettings] = useState({
         notifyOnNewVideo: true,
         notifyOnVideoReady: true,
         notifyOnCommentReply: true,
         notifyOnMention: true,
+        notifyOnLiveStream: true, // <--- НОВОЕ ПОЛЕ
     });
 
     const [isSaving, setIsSaving] = useState(false);
@@ -44,6 +47,7 @@ export default function NotificationsSettingsPage() {
                 notifyOnVideoReady: user.notifyOnVideoReady ?? true,
                 notifyOnCommentReply: user.notifyOnCommentReply ?? true,
                 notifyOnMention: user.notifyOnMention ?? true,
+                notifyOnLiveStream: user.notifyOnLiveStream ?? true, // <--- НОВОЕ ПОЛЕ
             });
         }
     }, [user]);
@@ -60,6 +64,7 @@ export default function NotificationsSettingsPage() {
             toast.success("Settings saved");
         } catch (error) {
             console.error("Failed to save settings", error);
+            // Откатываем UI, если сервер выдал ошибку
             setSettings(settings);
             toast.error("Failed to save settings. Please try again.");
         } finally {
@@ -102,6 +107,25 @@ export default function NotificationsSettingsPage() {
                                 <ToggleSwitch
                                     checked={settings.notifyOnNewVideo}
                                     onChange={() => handleToggle('notifyOnNewVideo')}
+                                    disabled={isSaving}
+                                />
+                            </div>
+                        </div>
+
+                        {/* === НОВЫЙ БЛОК ДЛЯ ТРАНСЛЯЦИЙ === */}
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex flex-col">
+                                <span className="text-[15px] font-medium text-white mb-0.5">
+                                    Live streams
+                                </span>
+                                <span className="text-[13px] text-[#aaaaaa]">
+                                    Notify me when a channel I'm subscribed to goes live.
+                                </span>
+                            </div>
+                            <div className="pt-1">
+                                <ToggleSwitch
+                                    checked={settings.notifyOnLiveStream}
+                                    onChange={() => handleToggle('notifyOnLiveStream')}
                                     disabled={isSaving}
                                 />
                             </div>

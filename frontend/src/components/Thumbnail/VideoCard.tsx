@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { MoreVertical, ListPlus, Clock } from "lucide-react";
+import { MoreVertical, ListPlus, Clock, Flag } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,6 +11,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import SaveToPlaylistModal from "@/components/Playlist/SaveToPlaylistModal";
+import ReportVideoModal from "@/components/Report/ReportVideoModal";
 
 export interface VideoProps {
     id: string | number;
@@ -23,6 +24,7 @@ export interface VideoProps {
     views: string | number;
     postedAt: string;
     hideAvatar?: boolean;
+    watchedPercent?: number;
 }
 
 const formatDuration = (time: string | number | undefined) => {
@@ -35,19 +37,20 @@ const formatDuration = (time: string | number | undefined) => {
 };
 
 export default function VideoCard({
-                                      id,
-                                      thumbnail,
-                                      duration,
-                                      title,
-                                      channelId,
-                                      channelName,
-                                      channelAvatar,
-                                      views,
-                                      postedAt,
-                                      hideAvatar = false,
-                                  }: VideoProps) {
-    // Состояние для открытия модалки плейлистов
+    id,
+    thumbnail,
+    duration,
+    title,
+    channelId,
+    channelName,
+    channelAvatar,
+    views,
+    postedAt,
+    hideAvatar = false,
+    watchedPercent,
+}: VideoProps) {
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     const firstLetter = channelName?.[0]?.toUpperCase() || "C";
     const formattedViews = typeof views === "number" ? views.toLocaleString() : views;
@@ -67,6 +70,15 @@ export default function VideoCard({
                         {formattedDuration}
                     </div>
                 )}
+
+                {watchedPercent !== undefined && watchedPercent > 0 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#aaaaaa]/30 z-10">
+                        <div
+                            className="h-full bg-[#FF0000] transition-all duration-300"
+                            style={{ width: `${Math.min(Math.max(watchedPercent, 0), 100)}%` }}
+                        />
+                    </div>
+                )}
             </Link>
 
             <div className="flex gap-3 items-start relative">
@@ -74,6 +86,7 @@ export default function VideoCard({
                     <Link href={`/channel/${channelId}`} className="shrink-0 mt-0.5">
                         <Avatar className="h-9 w-9 rounded-full">
                             <AvatarImage src={channelAvatar || undefined} />
+
                             <AvatarFallback className="bg-purple-600 text-xs text-white">
                                 {firstLetter}
                             </AvatarFallback>
@@ -105,40 +118,45 @@ export default function VideoCard({
                     </div>
                 </div>
 
-                {/* Кнопка с тремя точками (появляется при наведении на карточку) */}
                 <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                             <button className="p-1.5 text-[#aaaaaa] hover:text-white hover:bg-[#3f3f3f] rounded-full transition-colors cursor-pointer outline-none">
                                 <MoreVertical className="w-5 h-5" />
                             </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 bg-[#282828] border-[#3f3f3f] text-white rounded-xl shadow-2xl p-2">
-                            {/* Позже сюда можно будет добавить "Смотреть позже", когда будет готов эндпоинт для быстрого добавления в системные плейлисты */}
-                            <DropdownMenuItem
-                                className="cursor-pointer hover:bg-[#3f3f3f] focus:bg-[#3f3f3f] rounded-lg text-[14px] py-2.5"
-                            >
+                        <DropdownMenuContent align="end" className="w-56 bg-[#282828] border-[#3f3f3f] text-white rounded-xl shadow-2xl p-2 z-50">
+
+                            <DropdownMenuItem className="cursor-pointer hover:bg-[#3f3f3f] focus:bg-[#3f3f3f] rounded-lg text-[14px] py-2.5">
                                 <Clock className="w-4 h-4 mr-3" />
                                 Save to Watch Later
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem
-                                onClick={() => setIsPlaylistModalOpen(true)}
-                                className="cursor-pointer hover:bg-[#3f3f3f] focus:bg-[#3f3f3f] rounded-lg text-[14px] py-2.5"
-                            >
+                            <DropdownMenuItem onClick={() => setIsPlaylistModalOpen(true)} className="cursor-pointer hover:bg-[#3f3f3f] focus:bg-[#3f3f3f] rounded-lg text-[14px] py-2.5">
                                 <ListPlus className="w-4 h-4 mr-3" />
                                 Save to playlist
                             </DropdownMenuItem>
+
+                            <DropdownMenuItem onClick={() => setIsReportModalOpen(true)} className="cursor-pointer hover:bg-[#3f3f3f] focus:bg-[#3f3f3f] rounded-lg text-[14px] py-2.5">
+                                <Flag className="w-4 h-4 mr-3 text-[#AAAAAA]" />
+                                Report
+                            </DropdownMenuItem>
+
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
             </div>
 
-            {/* Модальное окно скрыто по умолчанию и рендерится поверх приложения */}
             <SaveToPlaylistModal
                 isOpen={isPlaylistModalOpen}
                 onClose={() => setIsPlaylistModalOpen(false)}
-                videoId={String(id)} // Приводим к строке, так как в props id может быть number
+                videoId={String(id)}
+            />
+
+            <ReportVideoModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                videoId={String(id)}
             />
         </div>
     );

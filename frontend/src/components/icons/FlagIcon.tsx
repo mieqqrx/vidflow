@@ -19,9 +19,9 @@ export const FlagIcon = ({ className, filled, ...props }: IconProps) => {
             <g clipPath="url(#clip0_153_738)">
                 <path
                     d="M13.18 4L13.42 5.2L13.58 6H14.4H19V13H13.82L13.58 11.8L13.42 11H12.6H6V4H13.18ZM14 3H5V21H6V12H12.6L13 14H20V5H14.4L14 3Z"
-                    fill="white"
-                    stroke="currentColor"
-                    strokeWidth={filled ? "0" : "1.5"}
+                    fill="#EEEEEE"
+                    stroke="#EEEEEE"
+                    strokeWidth={filled ? "0" : "1"}
                 />
             </g>
             <defs>

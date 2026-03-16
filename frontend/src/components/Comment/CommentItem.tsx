@@ -8,16 +8,12 @@ import {
     ChevronDown, ChevronUp, Pencil, X, Check, Trash2
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import {
-    useCreateCommentMutation,
-    useGetMeQuery,
-    useGetCommentRepliesQuery,
-    useUpdateCommentMutation,
-    useToggleCommentLikeMutation,
-    useToggleCommentDislikeMutation,
-    useDeleteCommentMutation
-} from "@/store/api/apiSlice";
 import { Comment } from "@/types";
+import {
+    useCreateCommentMutation, useDeleteCommentMutation,
+    useGetCommentRepliesQuery, useGetMeQuery, useToggleCommentDislikeMutation,
+    useToggleCommentLikeMutation, useUpdateCommentMutation
+} from "@/store/api";
 
 interface CommentProps extends Comment {
     depth?: number;
@@ -57,16 +53,18 @@ export default function CommentItem(props: CommentProps) {
     const userHandle = `@${safeUserName.replace(/\s+/g, '').toLowerCase()}`;
     const firstLetter = safeUserName[0]?.toUpperCase() || "U";
 
-    // Если у пользователя есть канал, ведем на него. Иначе - на страницу "канал не найден"
     const targetUrl = channelId ? `/channel/${channelId}` : `/channel/not-found`;
 
     const displayedReplies = initialReplies?.length ? initialReplies : fetchedReplies;
     const isMaxDepth = depth >= 2;
-    const avatarSize = depth === 0 ? "w-10 h-10" : depth === 1 ? "w-8 h-8" : "w-6 h-6 mt-1";
+
+    const avatarSize = depth === 0 ? "w-10 h-10" : "w-8 h-8 shrink-0 mt-0.5";
 
     const indentClass = depth === 0
         ? "mb-6"
-        : "ml-8 md:ml-12 mt-3 border-l-2 border-[#3f3f3f] pl-4";
+        : depth === 1
+            ? "ml-6 sm:ml-10 mt-3 border-l-2 border-[#3f3f3f] pl-3 sm:pl-4"
+            : "mt-3 ml-0";
 
     const handleReplyClick = () => {
         if (!showReplyInput) {
@@ -135,59 +133,41 @@ export default function CommentItem(props: CommentProps) {
         parentCommentId: (parentCommentId || null) as any
     });
 
-    // Функция отрисовки текста с синими ссылками-упоминаниями.
-    // Принимает targetId для формирования ссылки.
     const renderTextWithMentions = (textContent: string, targetId: string | null | undefined) => {
         if (!textContent) return "";
         const parts = textContent.split(/(@[\w.-]+)/g);
 
         return parts.map((part, index) => {
             if (part.startsWith('@')) {
-                // Если targetId есть, рендерим ссылку на канал, иначе ссылку на заглушку
-                if (targetId) {
-                    return (
-                        <Link
-                            key={index}
-                            href={`/channel/${targetId}`}
-                            className="text-[#3ea6ff] font-medium hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {part}
-                        </Link>
-                    );
-                } else {
-                    return (
-                        <Link
-                            key={index}
-                            href="/channel/not-found"
-                            className="text-[#3ea6ff] font-medium hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {part}
-                        </Link>
-                    );
-                }
+                return (
+                    <Link
+                        key={index}
+                        href={targetId ? `/channel/${targetId}` : "/channel/not-found"}
+                        className="text-[#3ea6ff] font-medium hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {part}
+                    </Link>
+                );
             }
             return <span key={index}>{part}</span>;
         });
     };
 
     return (
-        <div className={`flex flex-col w-full group ${indentClass}`}>
-            <div className="flex gap-4">
-                {/* Аватарка ведет на канал автора или на страницу-заглушку */}
-                <Link href={targetUrl}>
-                    <Avatar className={`cursor-pointer shrink-0 ${avatarSize}`}>
+        <div className={`flex flex-col group ${indentClass}`}>
+            <div className="flex gap-3 sm:gap-4">
+                <Link href={targetUrl} className="shrink-0">
+                    <Avatar className={`cursor-pointer ${avatarSize}`}>
                         <AvatarImage src={avatarUrl || undefined} />
                         <AvatarFallback className={depth > 0 ? "text-[10px]" : ""}>{firstLetter}</AvatarFallback>
                     </Avatar>
                 </Link>
 
-                <div className="flex flex-col gap-1 w-full min-w-0">
+                <div className="flex flex-col gap-1 flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[13px] mb-0.5">
-                            {/* Имя ведет на канал автора или на страницу-заглушку */}
-                            <Link href={targetUrl}>
+                        <div className="flex items-center gap-2 text-[13px] mb-0.5 min-w-0">
+                            <Link href={targetUrl} className="truncate">
                                 <span className="font-semibold text-white cursor-pointer hover:text-gray-300 transition-colors">
                                     {safeUserName}
                                 </span>
@@ -196,7 +176,7 @@ export default function CommentItem(props: CommentProps) {
                         </div>
 
                         {isOwner && !isEditing && (
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all shrink-0">
                                 <button
                                     onClick={() => setIsEditing(true)}
                                     className="p-1.5 hover:bg-[#272727] rounded-full cursor-pointer"
@@ -218,7 +198,7 @@ export default function CommentItem(props: CommentProps) {
                     </div>
 
                     {isEditing ? (
-                        <div className="flex flex-col gap-2 mt-1 w-full max-w-[800px]">
+                        <div className="flex flex-col gap-2 mt-1 w-full">
                             <textarea
                                 value={editText}
                                 onChange={(e) => setEditText(e.target.value)}
@@ -245,58 +225,54 @@ export default function CommentItem(props: CommentProps) {
                             </div>
                         </div>
                     ) : (
-                        <p className="text-[14px] text-white leading-tight whitespace-pre-wrap break-words">
-                            {/* Вызов функции с передачей channelId */}
+                        <p className="text-[14px] text-white leading-snug whitespace-pre-wrap break-words break-all">
                             {renderTextWithMentions(text || "", channelId)}
                         </p>
                     )}
 
-                    <div className="flex items-center gap-4 mt-1">
+                    <div className="flex items-center gap-3 sm:gap-4 mt-1">
                         <div
                             onClick={handleLike}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-[#272727] p-1.5 -ml-1.5 rounded-full transition-colors"
+                            className="flex items-center gap-1.5 cursor-pointer hover:bg-[#272727] p-1.5 -ml-1.5 rounded-full transition-colors shrink-0"
                         >
                             <ThumbsUp
                                 className={`${depth > 0 ? 'w-3 h-3' : 'w-4 h-4'} ${isLiked ? "fill-white text-white" : "text-white"}`}
                             />
-
                             <span className="text-[#AAAAAA] text-xs font-medium">{likesCount ?? 0}</span>
                         </div>
 
                         <div
                             onClick={handleDislike}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-[#272727] p-1.5 rounded-full transition-colors"
+                            className="flex items-center gap-1.5 cursor-pointer hover:bg-[#272727] p-1.5 rounded-full transition-colors shrink-0"
                         >
                             <ThumbsDown
                                 className={`${depth > 0 ? 'w-3 h-3' : 'w-4 h-4'} ${isDisliked ? "fill-white text-white" : "text-white"}`}
                             />
-
                             <span className="text-[#AAAAAA] text-xs font-medium">{dislikesCount ?? 0}</span>
                         </div>
 
                         <button
                             onClick={handleReplyClick}
-                            className="text-[#AAAAAA] text-xs font-semibold hover:bg-[#272727] cursor-pointer hover:text-white px-3 py-1.5 rounded-full transition-colors"
+                            className="text-[#AAAAAA] text-xs font-semibold hover:bg-[#272727] cursor-pointer hover:text-white px-3 py-1.5 rounded-full transition-colors shrink-0"
                         >
                             Reply
                         </button>
                     </div>
 
-                    {/* Логика ввода ответа */}
                     {showReplyInput && (
-                        <form onSubmit={handleReplySubmit} className="flex gap-4 mt-2 mb-2 w-full max-w-[800px]">
+                        <form onSubmit={handleReplySubmit} className="flex gap-3 sm:gap-4 mt-2 mb-2 w-full">
                             <Avatar className="h-6 w-6 shrink-0 mt-1">
                                 <AvatarImage src={currentUser?.avatarUrl || undefined} />
                                 <AvatarFallback className="text-[10px]">{currentUser?.username?.[0]?.toUpperCase() || "ME"}</AvatarFallback>
                             </Avatar>
 
-                            <div className="flex-1 flex flex-col items-end">
+                            <div className="flex-1 flex flex-col items-end min-w-0">
                                 <input
                                     type="text"
                                     value={replyText}
                                     onChange={(e) => setReplyText(e.target.value)}
                                     placeholder="Add a reply..."
-                                    className="w-full bg-transparent border-b border-[#3F3F3F] pb-1 text-[13px] text-white placeholder-[#AAAAAA] outline-none focus:border-white focus:border-b-2 transition-all"
+                                    className="w-full bg-transparent border-b border-[#3F3F3F] pb-1 text-[13px] text-white placeholder-[#AAAAAA] outline-none focus:border-white focus:border-b-2 transition-all min-w-0"
                                     disabled={isSubmittingReply}
                                     autoFocus
                                 />
@@ -327,7 +303,7 @@ export default function CommentItem(props: CommentProps) {
                         <div className="mt-1">
                             <button
                                 onClick={() => setShowReplies(!showReplies)}
-                                className="flex items-center gap-2 text-[#3ea6ff] font-medium text-sm hover:bg-[#3ea6ff]/10 px-3 py-1.5 rounded-full transition-colors cursor-pointer -ml-3"
+                                className="flex items-center gap-2 text-[#3ea6ff] font-medium text-sm hover:bg-[#3ea6ff]/10 px-3 py-1.5 rounded-full transition-colors cursor-pointer -ml-3 shrink-0"
                             >
                                 {showReplies ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                 {showReplies ? "Hide replies" : `${repliesCount} replies`}
@@ -336,7 +312,7 @@ export default function CommentItem(props: CommentProps) {
                     )}
 
                     {showReplies && (
-                        <div className="mt-2 flex flex-col w-full">
+                        <div className="mt-2 flex flex-col w-full min-w-0">
                             {isLoadingReplies ? (
                                 <Loader2 className="w-4 h-4 animate-spin text-[#3ea6ff] ml-2 mt-2" />
                             ) : (

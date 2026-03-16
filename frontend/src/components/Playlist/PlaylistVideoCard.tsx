@@ -5,7 +5,7 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { PlaylistVideoItem } from "@/types";
-import { useRemoveVideoFromPlaylistMutation } from "@/store/api/apiSlice";
+import { useRemoveVideoFromPlaylistMutation } from "@/store/api";
 import { toast } from "sonner";
 import {
     DropdownMenu,

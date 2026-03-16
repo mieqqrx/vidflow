@@ -7,7 +7,7 @@ import * as SliderPrimitive from "@radix-ui/react-slider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Video } from "@/types";
-import { useTrimVideoMutation } from "@/store/api/apiSlice";
+import { useTrimVideoMutation } from "@/store/api";
 
 interface VideoTrimmerProps {
     video: Video;

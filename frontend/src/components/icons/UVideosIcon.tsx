@@ -19,9 +19,9 @@ export const UVideosIcon = ({ className, filled, ...props }: IconProps) => {
             <g clipPath="url(#clip0_153_478)">
                 <path
                     d="M10 8L16 12L10 16V8ZM21 3V21H3V3H21ZM20 4H4V20H20V4Z"
-                    fill="white"
-                    stroke="currentColor"
-                    strokeWidth={filled ? "0" : "1.5"}
+                    fill="#EEEEEE"
+                    stroke="#EEEEEE"
+                    strokeWidth={filled ? "0" : "1"}
                 />
             </g>
             <defs>

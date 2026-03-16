@@ -1,15 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, KeyboardEvent } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
     ImagePlus, Copy, Check, AlertCircle, PlaySquare,
-    ChevronDown, Globe, Link as LinkIcon, Lock
+    ChevronDown, Globe, Link as LinkIcon, Lock, X
 } from "lucide-react";
 import { Video } from "@/types";
 import { Button } from "@/components/ui/button";
+
+function formatTimeWithMs(seconds: number) {
+    if (isNaN(seconds) || seconds < 0) return "0:00";
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs.toString().padStart(2, "0")}`;
+}
 
 const detailsSchema = z.object({
     title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title is too long"),
@@ -18,9 +25,17 @@ const detailsSchema = z.object({
 
 type DetailsFormValues = z.infer<typeof detailsSchema>;
 
+export interface VideoDetailsUpdatePayload {
+    title: string;
+    description?: string;
+    visibility: number;
+    customThumbnail?: File;
+    tags?: string[]; // <-- Добавили поле для тегов
+}
+
 interface VideoDetailsFormProps {
     video: Video;
-    onSave: (data: FormData) => void;
+    onSave: (data: VideoDetailsUpdatePayload) => void;
     isSaving: boolean;
 }
 
@@ -35,9 +50,12 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isCopied, setIsCopied] = useState(false);
 
-    // Состояния для нашего кастомного селекта видимости
     const [visibility, setVisibility] = useState<number>(video.visibility ?? 0);
     const [isVisibilityOpen, setIsVisibilityOpen] = useState(false);
+
+    // === СТЕЙТЫ ДЛЯ ТЕГОВ ===
+    const [tags, setTags] = useState<string[]>(video.tags || []);
+    const [tagInput, setTagInput] = useState("");
 
     const {
         register,
@@ -69,16 +87,36 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
         }
     };
 
+    // === ОБРАБОТЧИКИ ТЕГОВ ===
+    const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+        // Добавляем тег по нажатию Enter или запятой
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault(); // Важно: предотвращаем сабмит всей формы по Enter
+            const newTag = tagInput.trim().replace(/^#/, ''); // Убираем пробелы и хэштег, если юзер его написал
+
+            if (newTag && !tags.includes(newTag)) {
+                setTags([...tags, newTag]);
+            }
+            setTagInput("");
+        }
+        // Удаляем последний тег по Backspace, если инпут пустой
+        else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
+            setTags(tags.slice(0, -1));
+        }
+    };
+
+    const removeTag = (indexToRemove: number) => {
+        setTags(tags.filter((_, index) => index !== indexToRemove));
+    };
+
     const onSubmit = (data: DetailsFormValues) => {
-        const formData = new FormData();
-        formData.append("Title", data.title);
-        if (data.description) formData.append("Description", data.description);
-        if (selectedFile) formData.append("CustomThumbnail", selectedFile);
-
-        // Передаем значение видимости напрямую из стейта
-        formData.append("Visibility", visibility.toString());
-
-        onSave(formData);
+        onSave({
+            title: data.title,
+            description: data.description,
+            visibility: visibility,
+            customThumbnail: selectedFile || undefined,
+            tags: tags, // <-- Передаем теги в родительский компонент
+        });
     };
 
     const handleCopyLink = async () => {
@@ -90,12 +128,13 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
 
     const videoLink = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/watch/${video.id}`;
 
-    // Находим текущую выбранную опцию для отображения
     const selectedVisibilityOption = VISIBILITY_OPTIONS.find(opt => opt.value === visibility) || VISIBILITY_OPTIONS[0];
 
     return (
         <form id="video-details-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col xl:flex-row gap-8 w-full">
             <div className="flex-1 flex flex-col gap-8 w-full">
+
+                {/* --- TITLE --- */}
                 <div>
                     <div className={`relative border rounded-lg p-3 pt-5 transition-all duration-200 bg-[#0f0f0f] group focus-within:bg-[#121212] ${
                         errors.title ? 'border-red-500' : 'border-[#333] focus-within:border-[#3ea6ff] hover:border-[#555]'
@@ -118,11 +157,11 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                             {errors.title && <AlertCircle className="w-3.5 h-3.5" />}
                             {errors.title?.message}
                         </span>
-
                         <span className="text-[12px] text-[#aaaaaa] ml-auto font-mono">{titleValue.length}/100</span>
                     </div>
                 </div>
 
+                {/* --- DESCRIPTION --- */}
                 <div>
                     <div className={`relative border rounded-lg p-3 pt-5 transition-all duration-200 bg-[#0f0f0f] group focus-within:bg-[#121212] ${
                         errors.description ? 'border-red-500' : 'border-[#333] focus-within:border-[#3ea6ff] hover:border-[#555]'
@@ -145,12 +184,46 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                             {errors.description && <AlertCircle className="w-3.5 h-3.5" />}
                             {errors.description?.message}
                         </span>
-
                         <span className="text-[12px] text-[#aaaaaa] ml-auto font-mono">{descriptionValue.length}/5000</span>
                     </div>
                 </div>
 
+                {/* --- TAGS (НОВЫЙ БЛОК) --- */}
                 <div className="mt-2">
+                    <h3 className="text-[16px] font-semibold text-white mb-1.5 flex items-center gap-2">
+                        Tags
+                    </h3>
+                    <p className="text-[13px] text-[#aaaaaa] mb-4 max-w-2xl leading-relaxed">
+                        Tags can be useful if content in your video is commonly misspelled. Otherwise, tags play a minimal role in helping viewers find your video.
+                    </p>
+
+                    <div className={`relative border rounded-lg p-3 transition-all duration-200 bg-[#0f0f0f] group focus-within:bg-[#121212] border-[#333] focus-within:border-[#3ea6ff] hover:border-[#555] min-h-[60px] flex flex-wrap gap-2 items-center`}>
+                        {tags.map((tag, index) => (
+                            <div key={index} className="flex items-center gap-1 bg-[#272727] text-[#aaaaaa] border border-[#3f3f3f] px-2.5 py-1 rounded-sm text-[13px]">
+                                <span>{tag}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => removeTag(index)}
+                                    className="hover:text-white transition-colors ml-1 cursor-pointer"
+                                >
+                                    <X className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        ))}
+
+                        <input
+                            type="text"
+                            value={tagInput}
+                            onChange={(e) => setTagInput(e.target.value)}
+                            onKeyDown={handleTagKeyDown}
+                            className="flex-1 bg-transparent min-w-[150px] text-[15px] text-white outline-none placeholder:text-[#555]"
+                            placeholder={tags.length === 0 ? "Add tags (press Enter or comma)" : ""}
+                        />
+                    </div>
+                </div>
+
+                {/* --- THUMBNAIL --- */}
+                <div className="mt-2 border-t border-[#3F3F3F] pt-8">
                     <h3 className="text-[16px] font-semibold text-white mb-1.5 flex items-center gap-2">
                         <PlaySquare className="w-5 h-5 text-[#aaaaaa]" />
                         Thumbnail
@@ -172,7 +245,6 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                             {customThumbnailUrl ? (
                                 <>
                                     <img src={customThumbnailUrl} alt="Custom" className="w-full h-full object-cover" />
-
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-[2px]">
                                         <ImagePlus className="w-6 h-6 text-white transform group-hover:scale-110 transition-transform" />
                                     </div>
@@ -182,7 +254,6 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                                     <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center mb-2 group-hover:bg-[#333] transition-colors">
                                         <ImagePlus className="w-4 h-4 text-[#aaaaaa] group-hover:text-white transition-colors" />
                                     </div>
-
                                     <span className="text-[12px] font-medium text-[#aaaaaa] group-hover:text-white transition-colors">Upload file</span>
                                 </div>
                             )}
@@ -191,7 +262,6 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                         {!customThumbnailUrl && video.thumbnailUrl && (
                             <div className="relative w-[160px] h-[90px] rounded-lg overflow-hidden border-2 border-[#3ea6ff] shadow-[0_0_15px_rgba(62,166,255,0.15)] group">
                                 <img src={video.thumbnailUrl} alt="Current" className="w-full h-full object-cover" />
-
                                 <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded flex items-center gap-1.5">
                                     <div className="w-1.5 h-1.5 bg-[#3ea6ff] rounded-full animate-pulse" />
                                     <span className="text-[10px] font-medium text-white uppercase tracking-wider">Current</span>
@@ -202,6 +272,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                 </div>
             </div>
 
+            {/* --- ПРАВАЯ КОЛОНКА (ПРЕВЬЮ И ПРИВАТНОСТЬ) --- */}
             <div className="w-full xl:w-[380px] shrink-0">
                 <div className="sticky top-28 flex flex-col gap-6">
                     {/* Video Preview Card */}
@@ -227,6 +298,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                                 <div className="flex justify-between items-start gap-3">
                                     <a
                                         href={videoLink}
+                                        target="_blank"
                                         rel="noreferrer"
                                         className="text-[13px] text-[#3ea6ff] hover:text-[#6ebcff] hover:underline break-all leading-tight mt-1"
                                     >
@@ -251,7 +323,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                         </div>
                     </div>
 
-                    {/* Custom Visibility Dropdown */}
+                    {/* Visibility Dropdown */}
                     <div className="bg-[#0f0f0f] rounded-xl border border-[#2e2e2e] shadow-xl p-5">
                         <p className="text-[14px] font-medium text-white mb-4">Visibility</p>
 
@@ -271,10 +343,8 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                                 <ChevronDown className={`w-4 h-4 text-[#aaaaaa] transition-transform duration-200 ${isVisibilityOpen ? 'rotate-180' : ''}`} />
                             </button>
 
-                            {/* Dropdown Menu */}
                             {isVisibilityOpen && (
                                 <>
-                                    {/* Невидимый оверлей для закрытия меню по клику вне области */}
                                     <div className="fixed inset-0 z-40" onClick={() => setIsVisibilityOpen(false)} />
 
                                     <div className="absolute top-full left-0 w-full mt-2 bg-[#212121] border border-[#3f3f3f] rounded-lg shadow-2xl z-50 overflow-hidden py-2 animate-in fade-in zoom-in-95 duration-100">
@@ -313,10 +383,3 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
         </form>
     );
 }
-
-const formatTimeWithMs = (seconds: number) => {
-    if (isNaN(seconds) || seconds < 0) return "0:00";
-    const minutes = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${minutes}:${secs.toString().padStart(2, "0")}`;
-};

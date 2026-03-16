@@ -1,18 +1,35 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { ReactNode } from "react";
 
-export default function MainWrapper({ children }: { children: React.ReactNode }) {
+export default function MainWrapper({ children }: { children: ReactNode }) {
     const pathname = usePathname();
-    const isWatchPage = pathname.includes("/watch");
+
+    if (pathname?.startsWith("/admin")) {
+        return <>{children}</>;
+    }
+
+    const isWatchPage = pathname?.includes("/watch");
+    const isSearchPage = pathname?.includes("/search");
+    const isPlaylistPage = pathname?.startsWith("/playlists");
+    const isStudioPage = pathname?.startsWith("/studio");
+    const isAuthPage = pathname === "/login" || pathname === "/register";
+    const isHistoryPage = pathname?.includes("/history");
+    const isLiveStreamPage = pathname?.startsWith("/live");
+
+    const isSidebarHidden = isWatchPage || isAuthPage;
 
     return (
         <main
-            className={cn(
-                "flex-1 min-h-screen transition-all duration-300",
-                isWatchPage ? "ml-0" : "md:ml-[240px]"
-            )}
+            className={
+                `min-h-screen ${
+                    isWatchPage || isSearchPage || isPlaylistPage || isStudioPage || isHistoryPage || isLiveStreamPage
+                    ? "pt-0" 
+                    : "pt-14"} ${isSidebarHidden ? "" 
+                    : "md:ml-[240px]"
+                }`
+            }
         >
             {children}
         </main>

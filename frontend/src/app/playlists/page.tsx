@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { useGetMyPlaylistsQuery } from "@/store/api/apiSlice";
+import { useGetMyPlaylistsQuery } from "@/store/api";
 import PlaylistCard from "@/components/Playlist/PlaylistCard";
 
 export default function PlaylistsPage() {

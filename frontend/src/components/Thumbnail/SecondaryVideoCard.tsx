@@ -7,12 +7,13 @@ import Link from "next/link";
 export interface SecondaryVideoProps {
     id: string | number;
     thumbnail: string | null;
-    duration?: string | number; // Сделали необязательным и добавили number
+    duration?: string | number;
     title: string;
     channelId?: string;
     channelName: string;
     views: string | number;
     postedAt: string;
+    watchedPercent?: number; // <-- Добавили пропс для процентов
 }
 
 // Функция форматирования времени (та же логика, что в VideoCard)
@@ -26,15 +27,16 @@ const formatDuration = (time: string | number | undefined) => {
 };
 
 export default function SecondaryVideoCard({
-   id,
-   thumbnail,
-   duration,
-   title,
-   channelId,
-   channelName,
-   views,
-   postedAt
-}: SecondaryVideoProps) {
+                                               id,
+                                               thumbnail,
+                                               duration,
+                                               title,
+                                               channelId,
+                                               channelName,
+                                               views,
+                                               postedAt,
+                                               watchedPercent // <-- Принимаем его
+                                           }: SecondaryVideoProps) {
     const formattedViews = typeof views === "number" ? views.toLocaleString() : views;
     const formattedDuration = formatDuration(duration); // Применяем форматирование
 
@@ -49,8 +51,18 @@ export default function SecondaryVideoCard({
 
                 {/* Плашка времени появляется только если есть данные  */}
                 {formattedDuration && (
-                    <div className="absolute bottom-1 right-1 bg-black/80 px-1 py-0.5 rounded-[4px] text-[10px] font-medium text-white tracking-wide">
+                    <div className="absolute bottom-1.5 right-1 bg-black/80 px-1 py-0.5 rounded-[4px] text-[10px] font-medium text-white tracking-wide z-10">
                         {formattedDuration}
+                    </div>
+                )}
+
+                {/* --- САМ КРАСНЫЙ ПОЛЗУНОК --- */}
+                {watchedPercent !== undefined && watchedPercent > 0 && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#aaaaaa]/30 z-10">
+                        <div
+                            className="h-full bg-[#FF0000] transition-all duration-300"
+                            style={{ width: `${Math.min(Math.max(watchedPercent, 0), 100)}%` }}
+                        />
                     </div>
                 )}
             </Link>

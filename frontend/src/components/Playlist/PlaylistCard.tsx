@@ -9,15 +9,12 @@ interface PlaylistCardProps {
 }
 
 export default function PlaylistCard({ playlist }: PlaylistCardProps) {
-    // Определяем правильный ID (для системных это WL или LL)
     let listId = playlist.id;
     if (playlist.type === "WatchLater" || playlist.type === 2) listId = "WL";
     if (playlist.type === "Liked" || playlist.type === 1) listId = "LL";
 
-    // Ссылка на страницу самого плейлиста
     const playlistHref = `/playlist?list=${listId}`;
 
-    // Ссылка на первое видео в плейлисте (чтобы работала кнопка Play All)
     const firstVideoId = playlist.playlistVideos?.[0]?.videoId;
     const playHref = firstVideoId ? `/watch/${firstVideoId}?list=${listId}` : playlistHref;
 
@@ -28,7 +25,6 @@ export default function PlaylistCard({ playlist }: PlaylistCardProps) {
 
     return (
         <div className="group flex flex-col w-full">
-            {/* ВЕРХНЯЯ ЧАСТЬ (Картинка) - Ведет на просмотр первого видео с параметром ?list= */}
             <Link href={playHref} className="relative pt-2 cursor-pointer block">
                 <div className="absolute top-0 left-2 right-2 h-full bg-[#3F3F3F] rounded-xl transition-transform duration-300 group-hover:-translate-y-1" />
 
@@ -50,7 +46,6 @@ export default function PlaylistCard({ playlist }: PlaylistCardProps) {
                 </div>
             </Link>
 
-            {/* НИЖНЯЯ ЧАСТЬ (Текст) - Ведет на страницу со списком видео плейлиста */}
             <Link href={playlistHref} className="mt-3 flex flex-col cursor-pointer">
                 <h3 className="text-white text-[15px] font-semibold line-clamp-2 leading-snug group-hover:text-[#3ea6ff] transition-colors">
                     {title}

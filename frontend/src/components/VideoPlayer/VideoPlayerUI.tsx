@@ -7,31 +7,39 @@ import {
     Subtitles, RectangleHorizontal, Check, Loader2
 } from "lucide-react";
 
+// Подключаем наш хук управления громкостью
+import { useVolumeControl } from "@/hooks/useVolumeControl";
+
 export interface VideoPlayerUIProps {
     videoUrl?: string;
     thumbnail: string | null;
+    onEnded?: () => void;
+    autoplayEnabled?: boolean;
+    onToggleAutoplay?: () => void;
+    initialTime?: number;
+    onSavePosition?: (currentTime: number, isCompleted?: boolean) => void;
 }
 
-const formatTime = (time: number) => {
+const formatTime = (time: number, totalDuration?: number) => {
     if (isNaN(time)) return "0:00";
+
+    if (totalDuration !== undefined && (totalDuration - time) < 0.05) {
+        time = totalDuration;
+    }
 
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
-export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProps) {
+export default function VideoPlayerUI({
+                                          videoUrl, thumbnail, onEnded, autoplayEnabled = true, onToggleAutoplay, initialTime, onSavePosition
+                                      }: VideoPlayerUIProps) {
     const [isPlaying, setIsPlaying] = useState(false);
-    const [progress, setProgress] = useState(0);
     const [buffered, setBuffered] = useState(0);
-    const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
-
-    const [volume, setVolume] = useState(1);
-    const [isMuted, setIsMuted] = useState(false);
-    const [previousVolume, setPreviousVolume] = useState(1);
 
     const [isDraggingProgress, setIsDraggingProgress] = useState(false);
     const [isDraggingVolume, setIsDraggingVolume] = useState(false);
@@ -46,15 +54,23 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
     const containerRef = useRef<HTMLDivElement>(null);
 
     const progressBarRef = useRef<HTMLDivElement>(null);
+    const progressFillRef = useRef<HTMLDivElement>(null);
+    const timeTextRef = useRef<HTMLSpanElement>(null);
     const volumeBarRef = useRef<HTMLDivElement>(null);
 
     const hlsRef = useRef<Hls | null>(null);
+    const savePositionRef = useRef(onSavePosition);
+
+    // Инициализируем управление громкостью через хук
+    const { volume, isMuted, changeVolume, toggleMute } = useVolumeControl(videoRef);
+
+    useEffect(() => {
+        savePositionRef.current = onSavePosition;
+    }, [onSavePosition]);
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video || !videoUrl) return;
-
-        video.volume = volume;
 
         if (Hls.isSupported()) {
             const hls = new Hls();
@@ -105,6 +121,8 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
             video.src = videoUrl;
         }
 
+        video.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+
         return () => {
             if (hlsRef.current) {
                 hlsRef.current.destroy();
@@ -113,69 +131,46 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
         };
     }, [videoUrl]);
 
-    // --- ОБНОВЛЕНО: Отделяем визуальную перемотку от физической ---
     const updateProgress = (clientX: number, isFinal: boolean = false) => {
         if (videoRef.current && progressBarRef.current) {
             const rect = progressBarRef.current.getBoundingClientRect();
             const clickPosition = Math.max(0, Math.min(clientX - rect.left, rect.width));
             const percentage = clickPosition / rect.width;
-
             const newTime = percentage * videoRef.current.duration;
 
-            // Обновляем визуальную часть (синяя полоска и таймер) всегда
-            setProgress(percentage * 100);
-            setCurrentTime(newTime);
+            if (progressFillRef.current) progressFillRef.current.style.width = `${percentage * 100}%`;
+            if (timeTextRef.current) timeTextRef.current.innerText = `${formatTime(newTime)} / ${formatTime(videoRef.current.duration)}`;
 
-            // Физически проматываем видео ТОЛЬКО когда отпустили мышку (isFinal === true)
             if (isFinal) {
-                // Поскольку во время перетаскивания мы ставили видео на паузу,
-                // videoRef.current.currentTime все еще хранит то время, откуда мы НАЧАЛИ тянуть ползунок.
-                // Это позволяет нам идеально отследить перемотку назад.
-                const requiresHardRefresh = newTime < videoRef.current.currentTime && currentLevel !== -1;
-
-                if (requiresHardRefresh && hlsRef.current) {
-                    hlsRef.current.currentLevel = currentLevel; // Сброс старых чанков
-                }
-
-                videoRef.current.currentTime = newTime; // Реальная перемотка
+                videoRef.current.currentTime = newTime;
                 setIsBuffering(true);
             }
         }
     };
 
     const updateVolume = (clientX: number) => {
-        if (videoRef.current && volumeBarRef.current) {
+        if (volumeBarRef.current) {
             const rect = volumeBarRef.current.getBoundingClientRect();
             const clickPosition = Math.max(0, Math.min(clientX - rect.left, rect.width));
             const percentage = clickPosition / rect.width;
-
-            videoRef.current.volume = percentage;
-            setVolume(percentage);
-
-            if (percentage === 0) {
-                videoRef.current.muted = true;
-                setIsMuted(true);
-            } else if (isMuted) {
-                videoRef.current.muted = false;
-                setIsMuted(false);
-            }
+            // Передаем значение в хук вместо локального стейта
+            changeVolume(percentage);
         }
     };
 
-    // Глобальные слушатели мыши
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            if (isDraggingProgress) updateProgress(e.clientX, false); // isFinal = false (только визуал)
+            if (isDraggingProgress) updateProgress(e.clientX, false);
             if (isDraggingVolume) updateVolume(e.clientX);
         };
 
         const handleMouseUp = (e: MouseEvent) => {
             if (isDraggingProgress) {
                 setIsDraggingProgress(false);
-                updateProgress(e.clientX, true); // isFinal = true (отпустили кнопку, применяем перемотку!)
+                updateProgress(e.clientX, true);
 
                 if (videoRef.current && wasPlaying) {
-                    videoRef.current.play(); // Если играло, продолжаем играть
+                    videoRef.current.play().catch(() => {});
                 }
             }
             if (isDraggingVolume) {
@@ -192,7 +187,7 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
             document.removeEventListener("mousemove", handleMouseMove);
             document.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [isDraggingProgress, isDraggingVolume, wasPlaying, currentLevel]);
+    }, [isDraggingProgress, isDraggingVolume, wasPlaying, currentLevel, changeVolume]);
 
     const handleProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -201,15 +196,14 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
         setIsDraggingProgress(true);
         if (videoRef.current) {
             setWasPlaying(!videoRef.current.paused);
-            videoRef.current.pause(); // Ставим на паузу, пока тянем ползунок
+            videoRef.current.pause();
         }
-        updateProgress(e.clientX, false); // Визуально перепрыгиваем в точку клика
+        updateProgress(e.clientX, false);
     };
 
     const handleVolumeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-
         setIsDraggingVolume(true);
         updateVolume(e.clientX);
     };
@@ -228,29 +222,14 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
         if (videoRef.current) {
             if (isPlaying) {
                 videoRef.current.pause();
+                if (savePositionRef.current) savePositionRef.current(videoRef.current.currentTime, false);
             } else {
-                videoRef.current.play();
+                if (videoRef.current.duration > 0 && videoRef.current.duration - videoRef.current.currentTime < 0.5) {
+                    videoRef.current.currentTime = 0;
+                }
+                videoRef.current.play().catch(() => {});
             }
             setIsPlaying(!isPlaying);
-        }
-    };
-
-    const toggleMute = (e?: React.MouseEvent) => {
-        e?.stopPropagation();
-
-        if (videoRef.current) {
-            if (isMuted) {
-                const restoreVolume = previousVolume > 0 ? previousVolume : 1;
-                videoRef.current.muted = false;
-                videoRef.current.volume = restoreVolume;
-                setVolume(restoreVolume);
-                setIsMuted(false);
-            } else {
-                setPreviousVolume(volume);
-                videoRef.current.muted = true;
-                setVolume(0);
-                setIsMuted(true);
-            }
         }
     };
 
@@ -284,19 +263,29 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
                     loaded = bufferedRanges.end(bufferedRanges.length - 1);
                 }
             }
-
             setBuffered((loaded / videoRef.current.duration) * 100);
         }
     };
 
     const handleTimeUpdate = () => {
         if (videoRef.current) {
+            if (videoRef.current.readyState < 3) {
+                if (!isBuffering) setIsBuffering(true);
+                return;
+            } else if (isBuffering) {
+                setIsBuffering(false);
+            }
+
             const current = videoRef.current.currentTime;
             const total = videoRef.current.duration;
 
             if (!isDraggingProgress) {
-                setCurrentTime(current);
-                if (total > 0) setProgress((current / total) * 100);
+                if (progressFillRef.current && total > 0) {
+                    progressFillRef.current.style.width = `${(current / total) * 100}%`;
+                }
+                if (timeTextRef.current) {
+                    timeTextRef.current.innerText = `${formatTime(current)} / ${formatTime(total)}`;
+                }
             }
             updateBuffered();
         }
@@ -304,7 +293,40 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
 
     const handleLoadedMetadata = () => {
         if (videoRef.current) {
-            setDuration(videoRef.current.duration);
+            const videoDuration = videoRef.current.duration;
+            setDuration(videoDuration);
+
+            if (initialTime && initialTime > 0 && initialTime < videoDuration - 2) {
+                videoRef.current.currentTime = initialTime;
+
+                if (videoDuration > 0 && progressFillRef.current) {
+                    progressFillRef.current.style.width = `${(initialTime / videoDuration) * 100}%`;
+                }
+                if (timeTextRef.current) {
+                    timeTextRef.current.innerText = `${formatTime(initialTime)} / ${formatTime(videoDuration)}`;
+                }
+            } else {
+                if (timeTextRef.current) {
+                    timeTextRef.current.innerText = `0:00 / ${formatTime(videoDuration)}`;
+                }
+            }
+        }
+    };
+
+    const handleWaiting = () => {
+        setIsBuffering(true);
+        if (videoRef.current && videoRef.current.duration > 0) {
+            const current = videoRef.current.currentTime;
+            const total = videoRef.current.duration;
+
+            if (total - current < 0.5) {
+                videoRef.current.currentTime = total;
+                if (progressFillRef.current) progressFillRef.current.style.width = "100%";
+                setIsBuffering(false);
+                setIsPlaying(false);
+                if (savePositionRef.current) savePositionRef.current(total, true);
+                if (onEnded) onEnded();
+            }
         }
     };
 
@@ -315,6 +337,18 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
             togglePlay(e);
         }
     };
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (isPlaying) {
+            interval = setInterval(() => {
+                if (videoRef.current && savePositionRef.current) {
+                    savePositionRef.current(videoRef.current.currentTime, false);
+                }
+            }, 5000);
+        }
+        return () => clearInterval(interval);
+    }, [isPlaying]);
 
     const activeLevel = currentLevel !== -1 ? currentLevel : playingLevel;
     const isHD = activeLevel !== -1 && levels[activeLevel]?.height >= 720;
@@ -332,10 +366,17 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
                 onTimeUpdate={handleTimeUpdate}
                 onProgress={updateBuffered}
                 onLoadedMetadata={handleLoadedMetadata}
-                onEnded={() => setIsPlaying(false)}
+
                 onWaiting={() => setIsBuffering(true)}
-                onPlaying={() => setIsBuffering(false)}
+                onPlaying={() => { setIsBuffering(false); setIsPlaying(true); }}
+                onPause={() => setIsPlaying(false)}
                 onCanPlay={() => setIsBuffering(false)}
+
+                onEnded={() => {
+                    setIsPlaying(false);
+                    if (videoRef.current && savePositionRef.current) savePositionRef.current(videoRef.current.duration, true);
+                    if (onEnded) onEnded();
+                }}
             />
 
             {isBuffering && (
@@ -367,8 +408,9 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
                     ></div>
 
                     <div
-                        className={`absolute top-1/2 -translate-y-1/2 left-0 h-[5px] group-hover/progress:h-[6px] bg-[#3ea6ff] z-20 rounded-l-full ${isDraggingProgress ? 'transition-none' : 'transition-all'}`}
-                        style={{ width: `${progress}%` }}
+                        ref={progressFillRef}
+                        className={`absolute top-1/2 -translate-y-1/2 left-0 h-[5px] group-hover/progress:h-[6px] bg-[#3ea6ff] z-20 rounded-l-full ${isDraggingProgress ? 'transition-none' : 'transition-all duration-200 ease-out'}`}
+                        style={{ width: '0%' }}
                     >
                         <div className={`absolute right-[-6px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-[#3ea6ff] rounded-full transition-transform shadow-sm ${isDraggingProgress ? 'scale-125' : 'scale-0 group-hover/progress:scale-100'}`} />
                     </div>
@@ -384,7 +426,10 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
                             )}
                         </button>
 
-                        <SkipForward className="w-6 h-6 fill-white drop-shadow hover:text-[#3ea6ff] hidden sm:block cursor-pointer transition-colors" />
+                        <SkipForward
+                            onClick={onEnded}
+                            className={`w-6 h-6 fill-white drop-shadow hover:text-[#3ea6ff] hidden sm:block transition-colors ${onEnded ? 'cursor-pointer' : 'opacity-50 cursor-default'}`}
+                        />
 
                         <div className="flex items-center gap-2 group/vol">
                             <button onClick={toggleMute} className="hover:text-[#3ea6ff] transition-colors">
@@ -413,12 +458,34 @@ export default function VideoPlayerUI({ videoUrl, thumbnail }: VideoPlayerUIProp
                             </div>
                         </div>
 
-                        <span className="text-[13px] font-medium text-[#ddd] tracking-wide ml-1">
-                            {formatTime(currentTime)} / {formatTime(duration)}
+                        <span ref={timeTextRef} className="text-[13px] font-medium text-[#ddd] tracking-wide ml-1">
+                            0:00 / 0:00
                         </span>
                     </div>
 
                     <div className="flex items-center gap-4 md:gap-6 relative">
+                        {onToggleAutoplay && (
+                            <div
+                                className="relative flex items-center justify-center w-[42px] h-[24px] cursor-pointer group/autoplay mr-2 hidden sm:flex"
+                                onClick={(e) => { e.stopPropagation(); onToggleAutoplay(); }}
+                                title={`Autoplay is ${autoplayEnabled ? 'on' : 'off'}`}
+                            >
+                                <div className={`w-[34px] h-[14px] rounded-full transition-colors duration-300 ${autoplayEnabled ? 'bg-white/40' : 'bg-white/20'}`} />
+
+                                <div
+                                    className={`absolute w-[18px] h-[18px] bg-[#eeeeee] rounded-full flex items-center justify-center transition-transform duration-300 ease-in-out ${
+                                        autoplayEnabled ? 'translate-x-[8px]' : '-translate-x-[8px]'
+                                    }`}
+                                >
+                                    {autoplayEnabled ? (
+                                        <Play className="w-[9px] h-[9px] text-[#0f0f0f] fill-[#0f0f0f] ml-[1px]" />
+                                    ) : (
+                                        <Pause className="w-[9px] h-[9px] text-[#0f0f0f] fill-[#0f0f0f]" />
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         <Subtitles className="w-5 h-5 drop-shadow hover:text-white text-white/90 hidden sm:block cursor-pointer" strokeWidth={2} />
 
                         <div className="relative flex items-center">

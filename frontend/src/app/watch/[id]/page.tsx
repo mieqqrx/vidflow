@@ -1,26 +1,36 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, Suspense } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     ThumbsUp, ThumbsDown, Share2, Scissors,
-    MoreHorizontal, Loader2, Bell, ListPlus
+    MoreHorizontal, Loader2, Bell, ListPlus, Flag
 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import SecondaryVideoCard from "@/components/Thumbnail/SecondaryVideoCard";
 import CommentSection from "@/components/Comment/CommentSection";
 import VideoPlayerUI from "@/components/VideoPlayer/VideoPlayerUI";
 import SaveToPlaylistModal from "@/components/Playlist/SaveToPlaylistModal";
-import PlaylistSidebarPanel from "@/components/Playlist/PlaylistSidebarPanel"; // <-- Импортируем нашу новую панель
+import PlaylistSidebarPanel from "@/components/Playlist/PlaylistSidebarPanel";
+import ReportVideoModal from "@/components/Report/ReportVideoModal";
 
 import {
+    useGetMeQuery,
     useGetVideoByIdQuery,
-    useGetAllVideosQuery,
+    useGetSimilarVideosQuery, // <-- Подключили новый хук для похожих видео
     useGetSubscriptionsQuery,
     useUnsubscribeFromChannelMutation,
     useToggleNotificationsMutation,
@@ -32,17 +42,64 @@ import {
     useGetDislikeStatusQuery,
     useGetMyChannelQuery,
     useGetChannelByIdQuery,
-    useGetMyPlaylistsQuery // <-- Нужно для резолва системных плейлистов WL и LL
-} from "@/store/api/apiSlice";
+    useGetMyPlaylistsQuery,
+    useGetPlaylistByIdQuery,
+    useUpdateUserSettingsMutation,
+    useGetVideoPositionQuery,
+    useUpdateWatchPositionMutation
+} from "@/store/api";
 
 function WatchContent() {
     const params = useParams();
     const searchParams = useSearchParams();
+    const router = useRouter();
     const videoId = params.id as string;
     const listParam = searchParams.get("list");
 
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+    const { data: currentUser } = useGetMeQuery();
+    const [updateUserSettings] = useUpdateUserSettingsMutation();
+
+    const [localAutoplay, setLocalAutoplay] = useState(true);
+
+    useEffect(() => {
+        if (currentUser && currentUser.autoplayEnabled !== undefined) {
+            setLocalAutoplay(currentUser.autoplayEnabled);
+        }
+    }, [currentUser]);
+
+    const handleToggleAutoplay = async () => {
+        if (!currentUser) {
+            toast.info("Sign in to save your Autoplay settings");
+            return;
+        }
+
+        const newAutoplayState = !localAutoplay;
+        setLocalAutoplay(newAutoplayState);
+
+        try {
+            await updateUserSettings({ autoplayEnabled: newAutoplayState }).unwrap();
+            toast.success(`Autoplay is now ${newAutoplayState ? "ON" : "OFF"}`);
+        } catch (error) {
+            setLocalAutoplay(!newAutoplayState);
+            toast.error("Failed to save Autoplay setting");
+        }
+    };
+
+    const { data: positionData, isLoading: isPositionLoading } = useGetVideoPositionQuery(videoId, {
+        skip: !currentUser
+    });
+
+    const [updatePosition] = useUpdateWatchPositionMutation();
+
+    const handleSavePosition = (time: number) => {
+        if (currentUser) {
+            updatePosition({ videoId, positionSeconds: time });
+        }
+    };
 
     const { data: video, isLoading: isVideoLoading, isError: isVideoError } = useGetVideoByIdQuery(videoId);
 
@@ -53,26 +110,48 @@ function WatchContent() {
     const { data: myChannel } = useGetMyChannelQuery();
     const isOwner = myChannel?.id === video?.channelId;
 
-    const { data: allVideos } = useGetAllVideosQuery();
+    // === ПОЛУЧАЕМ ПОХОЖИЕ ВИДЕО ИЗ ELASTICSEARCH ===
+    const { data: similarVideosData } = useGetSimilarVideosQuery(
+        { videoId, count: 15 },
+        { skip: !videoId }
+    );
+    const relatedVideos = similarVideosData || [];
+
     const { data: subscriptions = [] } = useGetSubscriptionsQuery();
 
     const { data: likeData } = useGetLikeStatusQuery(videoId, { skip: !videoId });
     const { data: dislikeData } = useGetDislikeStatusQuery(videoId, { skip: !videoId });
 
-    // --- ЛОГИКА ДЛЯ ПЛЕЙЛИСТОВ ---
-    // Загружаем плейлисты только если в URL есть параметр WL или LL
     const { data: myPlaylists } = useGetMyPlaylistsQuery(undefined, {
         skip: !listParam || (listParam !== "WL" && listParam !== "LL")
     });
 
-    // Умное определение ID плейлиста (переводит WL и LL в реальные UUID)
     const targetPlaylistId = useMemo(() => {
         if (!listParam) return null;
         if (listParam === "WL") return myPlaylists?.find(p => p.type === 2)?.id || null;
         if (listParam === "LL") return myPlaylists?.find(p => p.type === 1)?.id || null;
         return listParam;
     }, [listParam, myPlaylists]);
-    // ----------------------------
+
+    const { data: playlistData } = useGetPlaylistByIdQuery(targetPlaylistId || "", {
+        skip: !targetPlaylistId
+    });
+
+    const handleVideoEnded = () => {
+        if (playlistData && listParam) {
+            const currentIndex = playlistData.videos.findIndex((v: any) => v.videoId === videoId);
+
+            if (currentIndex !== -1 && currentIndex < playlistData.videos.length - 1) {
+                const nextVideoId = playlistData.videos[currentIndex + 1].videoId;
+                router.push(`/watch/${nextVideoId}?list=${listParam}`);
+                return;
+            }
+        }
+
+        if (localAutoplay && relatedVideos.length > 0) {
+            router.push(`/watch/${relatedVideos[0].id}`);
+        }
+    };
 
     const isLiked = likeData?.isLiked || false;
     const isDisliked = dislikeData?.isDisliked || false;
@@ -96,7 +175,7 @@ function WatchContent() {
 
     if (isVideoLoading) {
         return (
-            <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center">
+            <div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center pt-[72px]">
                 <Loader2 className="w-10 h-10 animate-spin text-[#3ea6ff]" />
             </div>
         );
@@ -104,7 +183,7 @@ function WatchContent() {
 
     if (isVideoError || !video) {
         return (
-            <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white">
+            <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-center text-white pt-[72px]">
                 <h1 className="text-2xl font-bold mb-2">Video not found</h1>
                 <p className="text-[#AAAAAA]">This video is unavailable or has been removed.</p>
 
@@ -132,8 +211,6 @@ function WatchContent() {
             console.error("Failed to dislike video", error);
         }
     };
-
-    const relatedVideos = allVideos?.filter(v => v.id !== video.id) || [];
 
     const currentSubscription = subscriptions.find((sub: any) => sub.channelId === video.channelId);
     const isSubscribed = !!currentSubscription;
@@ -170,15 +247,26 @@ function WatchContent() {
     const formattedLikes = video.likesCount > 0 ? video.likesCount.toLocaleString() : "Like";
 
     return (
-        <div className="min-h-screen bg-[#0F0F0F] text-white pt-20 px-4 md:px-6 lg:px-8 xl:px-6 relative">
+        <div className="min-h-screen bg-[#0F0F0F] text-white pt-[72px] px-4 md:px-6 lg:px-8 xl:px-6 relative">
             <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row gap-6">
 
-                {/* --- ЛЕВАЯ КОЛОНКА (Видео + Инфо + Комменты) --- */}
                 <div className="flex-1 min-w-0">
-                    <VideoPlayerUI
-                        videoUrl={video.videoUrl}
-                        thumbnail={video.thumbnailUrl}
-                    />
+
+                    {currentUser && isPositionLoading ? (
+                        <div className="w-full aspect-video bg-black rounded-xl overflow-hidden flex items-center justify-center border border-[#3F3F3F] shadow-lg">
+                            <Loader2 className="w-12 h-12 text-[#3ea6ff] animate-spin" />
+                        </div>
+                    ) : (
+                        <VideoPlayerUI
+                            videoUrl={video.videoUrl}
+                            thumbnail={video.thumbnailUrl}
+                            onEnded={handleVideoEnded}
+                            autoplayEnabled={localAutoplay}
+                            onToggleAutoplay={handleToggleAutoplay}
+                            initialTime={positionData?.lastPositionSeconds || 0}
+                            onSavePosition={handleSavePosition}
+                        />
+                    )}
 
                     <h1 className="text-[20px] md:text-[22px] font-bold mt-4">
                         {video.title}
@@ -306,9 +394,20 @@ function WatchContent() {
                                 Clip
                             </Button>
 
-                            <Button variant="ghost" size="icon" className="cursor-pointer bg-[#272727] hover:bg-[#3F3F3F] text-white rounded-full h-9 w-9 shrink-0 transition-colors">
-                                <MoreHorizontal className="w-5 h-5" />
-                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="cursor-pointer bg-[#272727] hover:bg-[#3F3F3F] text-white rounded-full h-9 w-9 shrink-0 transition-colors outline-none">
+                                        <MoreHorizontal className="w-5 h-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48 bg-[#282828] border-[#3f3f3f] text-white rounded-xl shadow-2xl p-2 mt-2 z-50">
+                                    <DropdownMenuItem onClick={() => setIsReportModalOpen(true)} className="cursor-pointer hover:bg-[#3f3f3f] focus:bg-[#3f3f3f] rounded-lg text-[14px] py-2.5">
+                                        <Flag className="w-4 h-4 mr-3 text-[#AAAAAA]" />
+                                        <span>Report</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
                         </div>
                     </div>
 
@@ -330,10 +429,8 @@ function WatchContent() {
                     <CommentSection videoId={videoId}/>
                 </div>
 
-                {/* --- ПРАВАЯ КОЛОНКА (Плейлист + Рекомендации) --- */}
                 <div className="w-full lg:w-[380px] xl:w-[420px] shrink-0 flex flex-col gap-2 pb-10">
 
-                    {/* Рендерим панель плейлиста, если передан параметр ?list= */}
                     {targetPlaylistId && (
                         <PlaylistSidebarPanel
                             playlistId={targetPlaylistId}
@@ -386,14 +483,19 @@ function WatchContent() {
                 onClose={() => setIsPlaylistModalOpen(false)}
                 videoId={videoId}
             />
+
+            <ReportVideoModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                videoId={videoId}
+            />
         </div>
     );
 }
 
-// Обертка Suspense обязательна для useSearchParams в Next.js App Router
 export default function WatchPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-[#3ea6ff]" /></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-[#0F0F0F] flex items-center justify-center pt-[72px]"><Loader2 className="w-10 h-10 animate-spin text-[#3ea6ff]" /></div>}>
             <WatchContent />
         </Suspense>
     );

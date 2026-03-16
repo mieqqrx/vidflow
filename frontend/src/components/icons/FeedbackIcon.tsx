@@ -19,9 +19,9 @@ export const FeedbackIcon = ({ className, filled, ...props }: IconProps) => {
             <g clipPath="url(#clip0_153_768)">
                 <path
                     d="M13 14H11V12H13V14ZM13 5H11V11H13V5ZM19 3H5V19.59L8.29 16.3L8.59 16H9H19V3ZM20 2V17H9L4 22V2H20Z"
-                    fill="white"
-                    stroke="currentColor"
-                    strokeWidth={filled ? "0" : "1.5"}
+                    fill="#EEEEEE"
+                    stroke="#EEEEEE"
+                    strokeWidth={filled ? "0" : "1"}
                 />
             </g>
             <defs>

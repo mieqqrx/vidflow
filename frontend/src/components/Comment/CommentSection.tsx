@@ -4,13 +4,8 @@ import React, { useState } from "react";
 import { AlignLeft, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import CommentItem from "./CommentItem";
-import {
-    useGetVideoCommentsQuery,
-    useCreateCommentMutation,
-    useGetMeQuery,
-    useGetVideoByIdQuery
-} from "@/store/api/apiSlice";
 import { Comment } from "@/types";
+import { useCreateCommentMutation, useGetMeQuery, useGetVideoByIdQuery, useGetVideoCommentsQuery } from "@/store/api";
 
 interface CommentSectionProps {
     videoId: string;

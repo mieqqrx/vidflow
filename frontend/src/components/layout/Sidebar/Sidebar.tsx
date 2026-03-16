@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarItem } from "@/components/layout/Sidebar/SidebarItem";
-import { useGetSubscriptionsQuery } from "@/store/api/apiSlice";
+import { useGetSubscriptionsQuery } from "@/store/api";
 
 import { HomeIcon } from "@/components/icons/HomeIcon";
 import { CompassIcon } from "@/components/icons/CompassIcon";
@@ -48,7 +48,7 @@ const moreFromYoutube = [
 ];
 
 const footerItems = [
-    { icon: SettingsIcon, label: "Settings", href: "/settings" },
+    { icon: SettingsIcon, label: "Settings", href: "/settings/notifications" },
     { icon: FlagIcon, label: "Report history", href: "/reporthistory" },
     { icon: HelpIcon, label: "Help", href: "/help" },
     { icon: FeedbackIcon, label: "Send feedback", href: "/feedback" },
@@ -61,7 +61,12 @@ export default function Sidebar() {
 
     const { data: subscriptions = [] } = useGetSubscriptionsQuery();
 
-    if (pathname.includes("/watch") || pathname === "/login" || pathname === "/register") {
+    if (
+        pathname.includes("/watch") ||
+        pathname === "/login" ||
+        pathname === "/register" ||
+        pathname?.startsWith("/admin")
+    ) {
         return null;
     }
 

@@ -21,9 +21,12 @@ import {
     useDeleteNotificationMutation,
     useDeleteAllNotificationsMutation,
     useDeleteMultipleNotificationsMutation
-} from "@/store/api/apiSlice";
-import { NotificationItem } from "@/types";
+} from "@/store/api";
+
+import { NotificationItem, NotificationType } from "@/types";
 import { BellIcon } from "@/components/icons/BellIcon";
+
+import { fixUrl } from "@/utils/fixUrl";
 
 export default function NotificationMenu() {
     const router = useRouter();
@@ -59,9 +62,17 @@ export default function NotificationMenu() {
                 console.error("Failed to mark as read", error);
             }
         }
+
         setIsOpen(false);
+
         if (notification.videoId) {
-            router.push(`/watch/${notification.videoId}`);
+            const isShortVideo = notification.type === NotificationType.NewShort || notification.isShort;
+
+            if (isShortVideo) {
+                router.push(`/shorts/${notification.videoId}`);
+            } else {
+                router.push(`/watch/${notification.videoId}`);
+            }
         } else if (notification.channelId) {
             router.push(`/channel/${notification.channelId}`);
         }
@@ -194,6 +205,9 @@ export default function NotificationMenu() {
                             const firstLetter = notification.actorName?.[0]?.toUpperCase() || "Y";
                             const isChecked = selectedIds.has(notification.id);
 
+                            const isShortVideo = notification.type === NotificationType.NewShort || notification.isShort;
+                            const thumbnailWidth = isShortVideo ? "w-[27px]" : "w-[86px]";
+
                             return (
                                 <div
                                     key={notification.id}
@@ -219,7 +233,8 @@ export default function NotificationMenu() {
 
                                     <div className="flex flex-1 gap-4 overflow-hidden">
                                         <Avatar className="h-12 w-12 shrink-0 mt-1">
-                                            <AvatarImage src={notification.actorAvatarUrl || undefined} />
+                                            {}
+                                            <AvatarImage src={fixUrl(notification.actorAvatarUrl) || undefined} />
 
                                             <AvatarFallback className="bg-purple-600 text-white">
                                                 {firstLetter}
@@ -238,9 +253,9 @@ export default function NotificationMenu() {
                                     </div>
 
                                     {notification.thumbnailUrl && (
-                                        <div className="w-[86px] h-[48px] shrink-0 rounded overflow-hidden bg-black ml-2 mt-1">
+                                        <div className={`${thumbnailWidth} h-[48px] shrink-0 rounded overflow-hidden bg-black ml-2 mt-1 flex justify-center`}>
                                             <img
-                                                src={notification.thumbnailUrl}
+                                                src={fixUrl(notification.thumbnailUrl) || ""}
                                                 alt="Thumbnail"
                                                 className="w-full h-full object-cover"
                                             />

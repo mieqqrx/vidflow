@@ -6,10 +6,11 @@ import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner"; // <-- Added Sonner
+import { toast } from "sonner";
 
-import { useGetVideoByIdQuery, useUpdateVideoDetailsMutation } from "@/store/api/apiSlice";
-import VideoDetailsForm from "@/components/Studio/VideoDetailsForm";
+import { useGetVideoByIdQuery, useUpdateVideoDetailsMutation } from "@/store/api";
+// Импортируем сам компонент и его тип данных (Payload)
+import VideoDetailsForm, { VideoDetailsUpdatePayload } from "@/components/Studio/VideoDetailsForm";
 import VideoTrimmer from "@/components/Studio/VideoTrimmer";
 
 export default function VideoEditorPage() {
@@ -21,26 +22,20 @@ export default function VideoEditorPage() {
 
     const [updateDetails, { isLoading: isUpdating }] = useUpdateVideoDetailsMutation();
 
-    const handleSaveDetails = async (formData: FormData) => {
+    // Теперь мы принимаем готовый объект из компонента формы, а не сырой FormData
+    const handleSaveDetails = async (payload: VideoDetailsUpdatePayload) => {
         try {
-            const title = formData.get("Title") as string;
-            const description = formData.get("Description") as string;
-            const customThumbnail = formData.get("CustomThumbnail") as File;
-            const visibility = formData.get("Visibility") as string; // <-- Fetch visibility from form
-
+            // Передаем id и весь payload в RTK Query.
+            // Твоя мутация в apiSlice сама соберет из этого FormData для отправки на бэкенд!
             await updateDetails({
                 id: videoId,
-                title,
-                description,
-                customThumbnail,
-                // Only append if visibility is selected and exists
-                ...(visibility && { visibility: Number(visibility) })
+                ...payload
             }).unwrap();
 
-            toast.success("Video details saved successfully"); // <-- Success toast
+            toast.success("Video details saved successfully");
         } catch (err) {
             console.error("Failed to update video:", err);
-            toast.error("Failed to save changes"); // <-- Error toast
+            toast.error("Failed to save changes");
         }
     };
 

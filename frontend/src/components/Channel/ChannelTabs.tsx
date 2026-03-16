@@ -1,22 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const TABS = [
+const TABS: string[] = [
     "HOME",
     "VIDEOS",
     "PLAYLISTS",
-    "COMMUNITY",
-    "CHANNELS",
-    "ABOUT",
+    "LIVE",
 ];
 
-export default function ChannelTabs() {
-    const [activeTab, setActiveTab] = useState(TABS[0]);
+interface ChannelTabsProps {
+    activeTab: string;
+    setActiveTab: (tab: string) => void;
+}
 
+export default function ChannelTabs({ activeTab, setActiveTab }: ChannelTabsProps) {
     return (
         <div className="px-6 md:px-16 mt-0 flex items-center justify-between border-b border-[#3F3F3F]">
             <div className="flex items-center gap-8 overflow-x-auto no-scrollbar">

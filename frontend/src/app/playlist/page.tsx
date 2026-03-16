@@ -3,7 +3,7 @@
 import React, { useMemo, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, Play, Shuffle, Clock, Lock, Globe, ListVideo, ThumbsUp, ChevronDown } from "lucide-react";
-import { useGetMyPlaylistsQuery, useGetPlaylistByIdQuery, useUpdatePlaylistMutation } from "@/store/api/apiSlice";
+import { useGetMyPlaylistsQuery, useGetPlaylistByIdQuery, useUpdatePlaylistMutation } from "@/store/api";
 import PlaylistVideoCard from "@/components/Playlist/PlaylistVideoCard";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

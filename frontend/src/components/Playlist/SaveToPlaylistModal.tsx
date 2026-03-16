@@ -12,7 +12,7 @@ import {
     useCreatePlaylistMutation,
     useAddVideoToPlaylistMutation,
     useRemoveVideoFromPlaylistMutation
-} from "@/store/api/apiSlice";
+} from "@/store/api";
 
 interface SaveToPlaylistModalProps {
     isOpen: boolean;

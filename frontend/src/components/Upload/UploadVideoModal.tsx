@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import { Upload, X, Loader2, FileVideo, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useGetCategoriesQuery, useUploadVideoMutation } from "@/store/api/apiSlice";
+import { useGetCategoriesQuery, useUploadVideoMutation } from "@/store/api";
 
 interface UploadVideoModalProps {
     isOpen: boolean;

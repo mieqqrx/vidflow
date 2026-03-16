@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Camera, Loader2 } from "lucide-react";
-import { useCreateChannelMutation, useLazyGetMyChannelQuery } from "@/store/api/apiSlice";
+import { useCreateChannelMutation, useLazyGetMyChannelQuery } from "@/store/api";
 import { useDispatch } from "react-redux";
 
 export default function CreateChannelPage() {
