@@ -11,6 +11,8 @@
 **/.vs/
 **/*.user
 **/appsettings.Development.json
+**/appsettings.Production.json
+**/*.Backup.tmp
 
 # --- OS & IDE ---
 .DS_Store
