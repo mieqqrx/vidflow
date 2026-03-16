@@ -1,0 +1,147 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: youtube_postgres
+    environment:
+      POSTGRES_DB: youtubedb
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: youtube_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+
+  minio-setup:
+    image: minio/mc
+    container_name: youtube_minio_setup
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD};
+      mc mb --ignore-existing local/videos;
+      mc mb --ignore-existing local/thumbnails;
+      mc mb --ignore-existing local/channels;
+      mc mb --ignore-existing local/avatars;
+      mc mb --ignore-existing local/streams;
+      mc anonymous set download local/thumbnails;
+      mc anonymous set download local/avatars;
+      mc anonymous set download local/channels;
+      mc anonymous set download local/videos;
+      mc anonymous set download local/streams;
+      echo 'MinIO buckets configured';
+      "
+    restart: on-failure
+
+  elasticsearch:
+    image: elasticsearch:9.3.1
+    container_name: youtube_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - cluster.name=youtube-cluster
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kibana:
+    image: kibana:9.3.1
+    container_name: youtube_kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nginx-rtmp:
+    image: tiangolo/nginx-rtmp
+    container_name: youtube_nginx_rtmp
+    ports:
+      - "1935:1935"   
+      - "8080:8080"   
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - hls_data:/tmp/hls                            
+      - recordings_data:/tmp/recordings              
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./Youtube
+      dockerfile: Dockerfile
+    container_name: youtube_api
+    depends_on:
+      postgres:
+        condition: service_started
+      minio:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+      nginx-rtmp:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=youtubedb;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - MinIO__Endpoint=http://minio:9000
+      - MinIO__AccessKey=${MINIO_ROOT_USER}
+      - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
+      - MinIO__PublicUrl=http://${SERVER_IP}:9000
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+      - Jwt__ExpiresInMinutes=${JWT_EXPIRES}
+      - Elasticsearch__Url=http://elasticsearch:9200
+      - NginxRtmp__HlsPath=/tmp/hls
+      - NginxRtmp__RecordingsPath=/tmp/recordings
+      - NginxRtmp__InternalUrl=http://nginx-rtmp:8080
+      - Google__ClientId=${GOOGLE_CLIENT_ID}
+      - Google__ClientSecret=${GOOGLE_CLIENT_SECRET}
+    volumes:
+      - hls_data:/tmp/hls          
+      - recordings_data:/tmp/recordings
+    ports:
+      - "5000:8080"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  minio_data:
+  elasticsearch_data:
+  hls_data:
+  recordings_data:
