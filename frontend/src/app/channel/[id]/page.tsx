@@ -76,8 +76,6 @@ export default function ChannelPage() {
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0F0F0F]">
-            <TopMenu />
-
             <div className="w-full">
                 <ChannelHeader
                     channel={channel}
@@ -189,7 +187,6 @@ export default function ChannelPage() {
                             </div>
                         ) : streams && streams.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
-                                {/* ИСПРАВЛЕНО: Убран any, добавлен строгий тип LiveStreamResponse */}
                                 {streams.map((stream: LiveStreamResponse) => (
                                     <StreamCard key={stream.id} stream={stream} />
                                 ))}

@@ -90,7 +90,10 @@ export default function ChannelHeader({ channel, isOwner, activeTab, setActiveTa
             <div className="px-6 md:px-16 py-8">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-6 w-full">
                     <Avatar className="h-20 w-20 md:h-24 md:w-24 shrink-0">
-                        <AvatarImage src={channel.ownerAvatarUrl || channel.avatarUrl || undefined} className="object-cover" />
+                        <AvatarImage
+                            src={(channel.ownerAvatarUrl || channel.avatarUrl) ? `${channel.ownerAvatarUrl || channel.avatarUrl}?t=${new Date().getTime()}` : undefined}
+                            className="object-cover"
+                        />
                         <AvatarFallback className="bg-purple-600 text-3xl">{firstLetter}</AvatarFallback>
                     </Avatar>
 

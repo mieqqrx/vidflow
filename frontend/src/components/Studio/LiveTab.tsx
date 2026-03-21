@@ -37,7 +37,7 @@ export default function LiveTab({ channelId }: { channelId: string }) {
 
     const activeStream = channelStreams?.find((s: LiveStreamResponse) => s.status === LiveStreamStatus.Scheduled || s.status === LiveStreamStatus.Live);
     const pastStreams = channelStreams?.filter((s: LiveStreamResponse) => s.status === LiveStreamStatus.Ended || s.status === LiveStreamStatus.Failed) || [];
-    const rtmpServerUrl = process.env.NEXT_PUBLIC_RTMP_URL || "rtmp://26.192.139.137/live";
+    const rtmpServerUrl = process.env.NEXT_PUBLIC_RTMP_URL || "rtmp://localhost:1935/live";
 
     const isWorking = isCreatingStream || isUploadingThumbnail;
 

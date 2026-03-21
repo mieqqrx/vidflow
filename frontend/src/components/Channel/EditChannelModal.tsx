@@ -140,6 +140,7 @@ export default function EditChannelModal({ isOpen, onClose, channel, videos }: E
 
                                 <div className="bg-[#181818] p-5 rounded-xl border border-[#3F3F3F]/50 mt-4 flex items-start gap-4">
                                     <MonitorPlay className="w-6 h-6 text-[#AAAAAA] shrink-0 mt-1" />
+
                                     <div className="flex-1 w-full">
                                         <label className="block text-white font-medium text-sm mb-1">Featured video</label>
                                         <p className="text-[#AAAAAA] text-xs mb-3">Highlight a video for your subscribers to watch.</p>
@@ -171,7 +172,10 @@ export default function EditChannelModal({ isOpen, onClose, channel, videos }: E
                                 <div className="flex items-center gap-6 bg-[#181818] p-4 rounded-xl flex-1 border border-[#3F3F3F]/50">
                                     <div className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
                                         <Avatar className="w-24 h-24 border border-[#3F3F3F]">
-                                            <AvatarImage src={avatarPreview || undefined} className="object-cover" />
+                                            <AvatarImage
+                                                src={avatarPreview ? (avatarPreview.startsWith("blob:") ? avatarPreview : `${avatarPreview}?t=${new Date().getTime()}`) : undefined}
+                                                className="object-cover"
+                                            />
                                             <AvatarFallback className="bg-purple-600 text-2xl">{channel.name[0]}</AvatarFallback>
                                         </Avatar>
 
@@ -181,6 +185,7 @@ export default function EditChannelModal({ isOpen, onClose, channel, videos }: E
 
                                         <input type="file" hidden accept="image/jpeg, image/png, image/webp" ref={avatarInputRef} onChange={handleAvatarChange} />
                                     </div>
+
                                     <div className="flex flex-col gap-2">
                                         <p className="text-[#AAAAAA] text-xs max-w-[200px]">It's recommended to use a picture that's at least 98 x 98 pixels and 4MB or less.</p>
 

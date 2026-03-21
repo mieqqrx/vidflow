@@ -1,14 +1,19 @@
 "use client"
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+
 import { ListVideo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarItem } from "@/components/layout/Sidebar/SidebarItem";
+
 import { useGetSubscriptionsQuery } from "@/store/api";
+
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { closeDrawer } from "@/store/slices/sidebarSlice";
 
 import { HomeIcon } from "@/components/icons/HomeIcon";
 import { CompassIcon } from "@/components/icons/CompassIcon";
@@ -59,10 +64,16 @@ export default function Sidebar() {
     const searchParams = useSearchParams();
     const currentListId = searchParams.get("list");
 
+    const dispatch = useAppDispatch();
+    const { isOpen, isDrawerOpen } = useAppSelector((state) => state.sidebar);
+
     const { data: subscriptions = [] } = useGetSubscriptionsQuery();
 
+    useEffect(() => {
+        dispatch(closeDrawer());
+    }, [pathname, dispatch]);
+
     if (
-        pathname.includes("/watch") ||
         pathname === "/login" ||
         pathname === "/register" ||
         pathname?.startsWith("/admin")
@@ -70,9 +81,28 @@ export default function Sidebar() {
         return null;
     }
 
+    const isWatchPage = pathname?.includes("/watch");
+
+    let sidebarTransform = "-translate-x-full";
+    if (isWatchPage) {
+        if (isDrawerOpen) sidebarTransform = "translate-x-0";
+    } else {
+        sidebarTransform = isOpen ? "max-md:-translate-x-full md:translate-x-0" : "-translate-x-full";
+        if (isDrawerOpen) sidebarTransform = "translate-x-0";
+    }
+
     return (
         <>
-            <aside className="fixed left-0 top-14 bottom-0 z-40 w-[240px] bg-[#0F0F0F] overflow-y-auto overflow-x-hidden hidden md:flex flex-col sidebar-scrollbar pb-4 border-r border-white/5">
+            {isDrawerOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 z-[45] transition-opacity cursor-pointer"
+                    onClick={() => dispatch(closeDrawer())}
+                />
+            )}
+
+            <aside
+                className={`fixed left-0 top-14 bottom-0 z-50 w-[240px] bg-[#0F0F0F] overflow-y-auto overflow-x-hidden sidebar-scrollbar pb-4 border-r border-white/5 flex flex-col transition-transform duration-200 ease-in-out ${sidebarTransform}`}
+            >
                 <div className="px-3 py-3 space-y-1">
                     {mainItems.map((item) => (
                         <SidebarItem key={item.label} {...item} isActive={pathname === item.href} />
@@ -154,20 +184,19 @@ export default function Sidebar() {
             </aside>
 
             <style jsx global>{`
-                .sidebar-scrollbar::-webkit-scrollbar { 
-                    width: 8px; /* Ширина зоны захвата */
+                .sidebar-scrollbar::-webkit-scrollbar {
+                    width: 8px;
                 }
-                .sidebar-scrollbar::-webkit-scrollbar-track { 
-                    background: transparent; 
+                .sidebar-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
                 }
-                .sidebar-scrollbar::-webkit-scrollbar-thumb { 
-                    background-color: #717171; 
-                    border-radius: 10px; 
-                    /* Рамка цвета фона съедает часть толщины ползунка, делая его тонким! */
-                    border: 2px solid #0F0F0F; 
+                .sidebar-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: #717171;
+                    border-radius: 10px;
+                    border: 2px solid #0F0F0F;
                 }
-                .sidebar-scrollbar::-webkit-scrollbar-thumb:hover { 
-                    background-color: #aaaaaa; 
+                .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background-color: #aaaaaa;
                 }
             `}</style>
         </>

@@ -1,5 +1,4 @@
-﻿using Elastic.Clients.Elasticsearch.Security;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Youtube.DTOs;
 using Youtube.Models;
 using Youtube.Models.Search;
@@ -102,7 +101,7 @@ namespace Youtube.Services
         public async Task<(bool Success, string Message)> DeleteChannelAsync(Guid channelId, Guid userId)
         {
             var channel = await _context.Channels
-                .Include(c => c.Videos) 
+                .Include(c => c.Videos)
                 .FirstOrDefaultAsync(c => c.Id == channelId && c.OwnerId == userId);
 
             if (channel == null)
@@ -211,6 +210,38 @@ namespace Youtube.Services
                 VideosCount = videosCount,
                 CreatedAt = channel.CreatedAt
             });
+
+            var channelVideos = await _context.Videos
+            .Include(v => v.Category)
+            .Include(v => v.Channel)
+                .ThenInclude(c => c.Owner)
+            .Where(v => v.ChannelId == channelId && v.Status == VideoStatus.Ready)
+            .ToListAsync();
+
+            foreach (var video in channelVideos)
+            {
+                await _esService.UpdateVideoAsync(new VideoDocument
+                {
+                    Id = video.Id,
+                    Title = video.Title,
+                    Description = video.Description,
+                    Tags = video.Tags ?? Array.Empty<string>(),
+                    CategoryName = video.Category?.Name,
+                    Language = video.Language,
+                    ChannelName = channel.Name,
+                    ChannelAvatarUrl = user?.AvatarUrl,
+                    ChannelId = video.ChannelId,
+                    ThumbnailUrl = video.ThumbnailUrl,
+                    DurationSeconds = video.DurationSeconds,
+                    ViewsCount = video.ViewsCount,
+                    LikesCount = video.LikesCount,
+                    CommentsCount = video.CommentsCount,
+                    Visibility = (int)video.Visibility,
+                    AgeRestriction = video.AgeRestriction,
+                    IsShort = video.IsShort,
+                    CreatedAt = video.CreatedAt
+                });
+            }
 
             await _context.SaveChangesAsync();
             return (true, "Channel updated");

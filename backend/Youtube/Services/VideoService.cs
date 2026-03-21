@@ -18,7 +18,14 @@ namespace Youtube.Services
             _s3Service = s3Service;
             _configuration = configuration;
 
-            FFmpeg.SetExecutablesPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg"));
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+            {
+                FFmpeg.SetExecutablesPath("/usr/bin");
+            }
+            else
+            {
+                FFmpeg.SetExecutablesPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ffmpeg"));
+            }
         }
 
         public async Task<(bool Success, string Message, Guid? VideoId)> UploadVideoAsync(

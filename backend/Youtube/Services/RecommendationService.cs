@@ -1,7 +1,6 @@
 ﻿using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 using Microsoft.EntityFrameworkCore;
-using Youtube.Models;
 using Youtube.Models.Search;
 
 namespace Youtube.Services
@@ -98,8 +97,12 @@ namespace Youtube.Services
                     .ToList();
             }
 
+            // Ранний return — но теперь обогащаем WatchedPercent
             if (!subscribedChannelIds.Any() && !preferredTags.Any() && !preferredCategories.Any())
-                return await GetPopularAsync(count);
+            {
+                var popular = (await GetPopularAsync(count)).ToList();
+                return await EnrichWithWatchPercentAsync(popular, userId, context);
+            }
 
             var shouldQueries = new List<Query>();
 
@@ -196,6 +199,7 @@ namespace Youtube.Services
 
             var results = response.Documents.ToList();
 
+            // Сначала добираем популярные если не хватает
             if (results.Count < count)
             {
                 var popular = await GetPopularAsync(count - results.Count);
@@ -203,10 +207,12 @@ namespace Youtube.Services
                 results.AddRange(popular.Where(v => !existingIds.Contains(v.Id)));
             }
 
-            return results;
+            // Потом обогащаем весь итоговый список
+            return await EnrichWithWatchPercentAsync(results, userId, context);
         }
 
-        public async Task<IEnumerable<VideoDocument>> GetSimilarAsync(Guid videoId, int count = 20)
+        public async Task<IEnumerable<VideoDocument>> GetSimilarAsync(
+            Guid videoId, int count = 20, Guid? userId = null)
         {
             using var scope = _scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -278,7 +284,7 @@ namespace Youtube.Services
                             },
                             new Query
                             {
-                                Term = new TermQuery { Field = "isShort", Value = false } 
+                                Term = new TermQuery { Field = "isShort", Value = false }
                             }
                         },
                         MustNot = new List<Query>
@@ -301,12 +307,16 @@ namespace Youtube.Services
             });
 
             var results = response.Documents.ToList();
+
             if (results.Count < count)
             {
                 var popular = await GetPopularAsync(count - results.Count);
                 var existingIds = results.Select(v => v.Id).ToHashSet();
                 results.AddRange(popular.Where(v => !existingIds.Contains(v.Id)));
             }
+
+            if (userId.HasValue)
+                return await EnrichWithWatchPercentAsync(results, userId.Value, context);
 
             return results;
         }
@@ -328,7 +338,7 @@ namespace Youtube.Services
                             },
                             new Query
                             {
-                                Term = new TermQuery { Field = "isShort", Value = false } 
+                                Term = new TermQuery { Field = "isShort", Value = false }
                             }
                         }
                     }
@@ -346,7 +356,7 @@ namespace Youtube.Services
         }
 
         public async Task<IEnumerable<VideoDocument>> GetShortsRecommendationsAsync(
-    Guid? userId, int count = 20, Guid? excludeVideoId = null)
+            Guid? userId, int count = 20, Guid? excludeVideoId = null)
         {
             var filterQueries = new List<Query>
             {
@@ -465,9 +475,9 @@ namespace Youtube.Services
                             }
                         },
                         Sort = new List<SortOptions>
-                {
-                    new SortOptions { Score = new ScoreSort { Order = SortOrder.Desc } }
-                }
+                        {
+                            new SortOptions { Score = new ScoreSort { Order = SortOrder.Desc } }
+                        }
                     });
 
                     var results = response.Documents.ToList();
@@ -496,10 +506,10 @@ namespace Youtube.Services
                     Bool = new BoolQuery
                     {
                         Filter = new List<Query>
-                {
-                    new Query { Term = new TermQuery { Field = "visibility", Value = (int)VideoVisibility.Public } },
-                    new Query { Term = new TermQuery { Field = "isShort", Value = true } }
-                }
+                        {
+                            new Query { Term = new TermQuery { Field = "visibility", Value = (int)VideoVisibility.Public } },
+                            new Query { Term = new TermQuery { Field = "isShort", Value = true } }
+                        }
                     }
                 },
                 Sort = new List<SortOptions>
@@ -509,6 +519,25 @@ namespace Youtube.Services
             });
 
             return response.Documents;
+        }
+
+        private async Task<List<VideoDocument>> EnrichWithWatchPercentAsync(
+            List<VideoDocument> videos, Guid userId, AppDbContext context)
+        {
+            if (!videos.Any()) return videos;
+
+            var videoIds = videos.Select(v => v.Id).ToList();
+            var watchHistoryMap = await context.WatchHistories
+                .Where(w => w.UserId == userId && videoIds.Contains(w.VideoId))
+                .ToDictionaryAsync(w => w.VideoId, w => w.WatchedPercent);
+
+            foreach (var doc in videos)
+            {
+                if (watchHistoryMap.TryGetValue(doc.Id, out var percent))
+                    doc.WatchedPercent = percent;
+            }
+
+            return videos;
         }
     }
 }
