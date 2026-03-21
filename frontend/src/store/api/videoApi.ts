@@ -49,6 +49,11 @@ export const videoApi = apiSlice.injectEndpoints({
                 : [{ type: "Video", id: "LIST" }],
         }),
 
+        getSubscriptionVideos: builder.query<Video[], void>({
+            query: () => "/videos/feed/subscriptions",
+            providesTags: ["Video"],
+        }),
+
         uploadVideo: builder.mutation<Video, FormData>({
             query: (formData) => ({
                 url: "/videos/upload",
@@ -225,6 +230,7 @@ export const {
     useGetAllVideosQuery,
     useGetVideoByIdQuery,
     useGetVideosByChannelIdQuery,
+    useGetSubscriptionVideosQuery,
     useUploadVideoMutation,
     useUpdateVideoDetailsMutation,
     useDeleteVideoMutation,

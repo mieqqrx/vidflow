@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
-
 import { useAppSelector } from "@/store/hooks";
 
 export default function MainWrapper({ children }: { children: ReactNode }) {
@@ -33,7 +32,7 @@ export default function MainWrapper({ children }: { children: ReactNode }) {
                     ? "pt-0"
                     : "pt-14"
             } ${
-                !isOverlayPage && isOpen ? "md:ml-[240px]" : "md:ml-0"
+                !isOverlayPage ? (isOpen ? "md:ml-[240px]" : "md:ml-[72px]") : "md:ml-0"
             }`}
         >
             {children}
