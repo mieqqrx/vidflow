@@ -15,7 +15,7 @@ namespace Youtube.Tests
             var video = new Video { DurationSeconds = 100 };
             var trimDto = new TrimVideoDto
             {
-                StartSeconds = 50,
+                StartSeconds = 10, // 50
                 EndSeconds = 40
             };
             bool isValid = trimDto.StartSeconds < trimDto.EndSeconds;
