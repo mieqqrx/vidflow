@@ -22,14 +22,17 @@ pipeline {
         stage('Run Tests & Report') {
             steps {
                 dir('backend') {
-                  sh "dotnet test Youtube.Tests/Youtube.Tests.csproj --no-build --configuration Release --logger \"junit;LogFileName=test-results.xml;MethodFormat=Class;FailureBodyFormat=Verbose\""
+                 
+                    sh "dotnet test Youtube.Tests/Youtube.Tests.csproj --no-build --configuration Release --logger \"trx;LogFileName=test-results.xml\""
+                }
             }
         }
     }
 
     post {
         always {
-            junit '**/test-results.xml'
+            mstest testResults: '**/test-results.xml'
+            
         }
     }
 }
