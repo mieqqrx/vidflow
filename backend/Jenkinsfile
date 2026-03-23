@@ -1,40 +1,36 @@
 pipeline {
     agent any
-environment {
+
+    environment {
         DOTNET_SYSTEM_GLOBALIZATION_INVARIANT = 'true'
     }
-tools {
+
+    tools {
         dotnetsdk 'dotnet10' 
     }
+
     stages {
-        stage('Checkout') {
+        stage('Restore & Build') {
             steps {
-                checkout scm
-            }
-        }
-
-        stage('Restore') {
-            steps {
-                sh "dotnet restore Youtube.slnx"
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh "dotnet build Youtube.slnx --configuration Release"
+                dir('backend') {
+                    sh "dotnet restore Youtube.slnx"
+                    sh "dotnet build Youtube.slnx --configuration Release"
+                }
             }
         }
 
         stage('Run Tests & Report') {
             steps {
-                sh "dotnet test Youtube.Tests/Youtube.Tests.csproj --no-build --configuration Release --logger 'junit;LogFileName=test-results.xml'"
+                dir('backend') {
+                    sh "dotnet test Youtube.Tests/Youtube.Tests.csproj --no-build --configuration Release --logger 'junit;LogFileName=test-results.xml'"
+                }
             }
         }
     }
 
     post {
         always {
-            junit '**/TestResults/*.xml'
+            junit '**/test-results.xml'
         }
     }
 }
