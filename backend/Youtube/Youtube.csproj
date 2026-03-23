@@ -21,6 +21,9 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
     <PackageReference Include="Xabe.FFmpeg" Version="6.0.2" />
+	  <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+		  <_Parameter1>Youtube.Tests</_Parameter1>
+	  </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

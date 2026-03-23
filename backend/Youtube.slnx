@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="Youtube.Tests/Youtube.Tests.csproj" Id="0b3f5f08-3be1-44fe-9f48-32f1c0cd8066" />
   <Project Path="Youtube/Youtube.csproj" />
 </Solution>
