@@ -22,7 +22,6 @@ pipeline {
         stage('Run Tests & Report') {
             steps {
                 dir('backend') {
-                 
                     sh "dotnet test Youtube.Tests/Youtube.Tests.csproj --no-build --configuration Release --logger \"trx;LogFileName=test-results.xml\""
                 }
             }
@@ -31,8 +30,8 @@ pipeline {
 
     post {
         always {
-            mstest testResults: '**/test-results.xml'
-            
+            // Виправлений параметр для плагіна MSTest
+            mstest testResultsFile: '**/test-results.xml'
         }
     }
 }
