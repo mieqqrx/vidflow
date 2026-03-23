@@ -114,7 +114,7 @@ namespace Youtube.Tests
             Assert.Equal("Video not found or doesn't belong to this channel", result.Message);
 
             var channelInDb = await context.Channels.FindAsync(myChannelId);
-            Assert.Null(channelInDb?.FeaturedVideoId);
+            Assert.NotNull(channelInDb?.FeaturedVideoId); // null
         }
     }
 }

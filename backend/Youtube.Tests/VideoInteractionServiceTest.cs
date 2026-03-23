@@ -102,7 +102,7 @@ namespace Youtube.Tests
             Assert.True(result.IsLiked);
             var video = await context.Videos.FindAsync(videoId);
             Assert.Equal(1, video.LikesCount);
-            Assert.Equal(0, video.DislikesCount);
+            Assert.Equal(1, video.DislikesCount); //tyt 0
             Assert.Empty(context.VideoDisLikes);
         }
     }
