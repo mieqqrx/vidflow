@@ -51,7 +51,7 @@ export default function Home() {
                                     title={video.title}
                                     channelId={video.channelId}
                                     channelName={video.channelName || "Unknown Channel"}
-                                    channelAvatar={video.channel?.avatarUrl || null}
+                                    channelAvatar={video.channelAvatarUrl || null}
                                     views={video.viewsCount}
                                     postedAt={video.createdAt ? formatDistanceToNow(new Date(video.createdAt), { addSuffix: true }) : "Recently"}
                                     watchedPercent={video.watchedPercent}

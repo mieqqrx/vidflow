@@ -30,7 +30,7 @@ import ReportVideoModal from "@/components/Report/ReportVideoModal";
 import {
     useGetMeQuery,
     useGetVideoByIdQuery,
-    useGetSimilarVideosQuery, // <-- Подключили новый хук для похожих видео
+    useGetSimilarVideosQuery,
     useGetSubscriptionsQuery,
     useUnsubscribeFromChannelMutation,
     useToggleNotificationsMutation,
@@ -48,6 +48,7 @@ import {
     useGetVideoPositionQuery,
     useUpdateWatchPositionMutation
 } from "@/store/api";
+import {fixUrl} from "@/utils/fixUrl";
 
 function WatchContent() {
     const params = useParams();
@@ -242,7 +243,7 @@ function WatchContent() {
     const formattedViews = video.viewsCount?.toLocaleString() || "0";
 
     const formattedSubscribers = channelData?.subscribersCount?.toLocaleString() || "0";
-    const avatarUrl = channelData?.avatarUrl || undefined;
+    const avatarUrl = video.channelAvatarUrl || channelData?.ownerAvatarUrl || channelData?.avatarUrl;
 
     const formattedLikes = video.likesCount > 0 ? video.likesCount.toLocaleString() : "Like";
 
@@ -276,7 +277,7 @@ function WatchContent() {
                         <div className="flex items-center gap-3">
                             <Link href={`/channel/${video.channelId}`}>
                                 <Avatar className="h-10 w-10 cursor-pointer">
-                                    <AvatarImage src={avatarUrl} />
+                                    <AvatarImage src={fixUrl(avatarUrl) || undefined} />
                                     <AvatarFallback className="bg-purple-600 text-white">{firstLetter}</AvatarFallback>
                                 </Avatar>
                             </Link>
