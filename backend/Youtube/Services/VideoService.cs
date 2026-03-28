@@ -804,5 +804,83 @@ namespace Youtube.Services
 
             return (true, $"Video visibility set to {visibility}");
         }
+
+        public async Task<IEnumerable<VideoResponseDto>> GetSubscriptionVideosAsync(Guid userId, int limit = 50)
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            // 1. Получаем список ID каналов, на которые подписан пользователь
+            var subscribedChannelIds = await context.Subscriptions
+                .Where(s => s.UserId == userId)
+                .Select(s => s.ChannelId)
+                .ToListAsync();
+
+            if (!subscribedChannelIds.Any())
+                return new List<VideoResponseDto>();
+
+            // 2. Достаем свежие видео из этих каналов
+            var videos = await context.Videos
+                .Where(v => subscribedChannelIds.Contains(v.ChannelId) 
+                            && !v.IsShort 
+                            && v.Status == VideoStatus.Ready 
+                            && v.Visibility == VideoVisibility.Public)
+                .OrderByDescending(v => v.CreatedAt)
+                .Take(limit)
+                .Select(v => new VideoResponseDto
+                {
+                    Id = v.Id,
+                    Title = v.Title,
+                    Description = v.Description,
+                    VideoUrl = v.VideoUrl,
+                    VideoUrl360p = v.VideoUrl360p,
+                    VideoUrl720p = v.VideoUrl720p,
+                    VideoUrl1080p = v.VideoUrl1080p,
+                    ThumbnailUrl = v.ThumbnailUrl,
+                    ViewsCount = v.ViewsCount,
+                    LikesCount = v.LikesCount,
+                    DislikesCount = v.DislikesCount,
+                    DurationSeconds = v.DurationSeconds,
+                    CreatedAt = v.CreatedAt,
+                    IsAdminHidden = v.IsAdminHidden,
+                    ChannelId = v.ChannelId,
+                    CommentsCount = v.CommentsCount,
+                    Visibility = v.Visibility,
+                    ChannelName = v.Channel.Name,
+                    ChannelAvatarUrl = v.Channel.Owner.AvatarUrl,
+                    Tags = v.Tags,
+                    Language = v.Language,
+                    CategoryName = v.Category != null ? v.Category.Name : "Без категории",
+                    IsLiked = v.Likes.Any(l => l.UserId == userId),
+                    IsDisliked = v.Dislikes.Any(d => d.UserId == userId)
+                })
+                .ToListAsync();
+
+            if (videos.Any())
+            {
+                var videoIds = videos.Select(v => v.Id).ToList();
+                var watchHistories = await context.WatchHistories
+                    .Where(wh => wh.UserId == userId && videoIds.Contains(wh.VideoId))
+                    .ToDictionaryAsync(wh => wh.VideoId);
+
+                foreach (var video in videos)
+                {
+                    if (watchHistories.TryGetValue(video.Id, out var wh))
+                    {
+                        video.LastPositionSeconds = wh.LastPositionSeconds;
+                        video.WatchedPercent = wh.WatchedPercent;
+                        video.IsCompleted = wh.IsCompleted;
+                    }
+                    else
+                    {
+                        video.LastPositionSeconds = 0;
+                        video.WatchedPercent = 0;
+                        video.IsCompleted = false;
+                    }
+                }
+            }
+
+            return videos;
+        }
     }
 }

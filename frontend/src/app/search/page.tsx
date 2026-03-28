@@ -15,7 +15,8 @@ import { Loader2, Filter, Check, Bell, X } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Channel, SearchChannelDocument } from "@/types";
+
+import { Channel, SearchChannelDocument, Subscription } from "@/types";
 
 function formatDuration(seconds: number) {
     const m = Math.floor(seconds / 60);
@@ -23,7 +24,6 @@ function formatDuration(seconds: number) {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
-// Компонент пункта фильтра с галочкой
 function FilterItem({ label, active, onClick }: { label: string, active: boolean, onClick: () => void }) {
     return (
         <button
@@ -38,16 +38,10 @@ function FilterItem({ label, active, onClick }: { label: string, active: boolean
     );
 }
 
-// Расширяем базовый тип Channel полями, которые приходят от бэкенда в подписках
-type SubscriptionItem = Channel & {
-    channelId?: string;
-    notificationEnabled?: boolean;
-};
-
 interface ChannelSearchItemProps {
     channel: SearchChannelDocument;
     myChannel?: Channel;
-    subscriptions?: Channel[];
+    subscriptions?: Subscription[];
     router: ReturnType<typeof useRouter>;
 }
 
@@ -56,9 +50,8 @@ function ChannelSearchItem({ channel, myChannel, subscriptions, router }: Channe
     const [unsubscribe, { isLoading: isUnsubscribing }] = useUnsubscribeFromChannelMutation();
     const [toggleNotifications, { isLoading: isTogglingNotifications }] = useToggleNotificationsMutation();
 
-    // Приводим массив к нашему расширенному типу SubscriptionItem, чтобы TypeScript увидел поля channelId
-    const currentSubscription = (subscriptions as SubscriptionItem[])?.find(
-        (sub) => sub.channelId === channel.id || sub.id === channel.id
+    const currentSubscription = subscriptions?.find(
+        (sub) => sub.channelId === channel.id
     );
 
     const isSubscribed = !!currentSubscription;
@@ -173,7 +166,6 @@ function ChannelSearchItem({ channel, myChannel, subscriptions, router }: Channe
     );
 }
 
-// Тип для фильтра длительности
 type DurationFilter = "any" | "short" | "medium" | "long";
 
 function SearchResultsContent() {
@@ -181,36 +173,26 @@ function SearchResultsContent() {
     const router = useRouter();
     const query = searchParams.get("q") || "";
 
-    // === СТЕЙТЫ ФИЛЬТРОВ И МОДАЛКИ ===
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
-
     const [sortBy, setSortBy] = useState<number>(0);
     const [duration, setDuration] = useState<DurationFilter>("any");
     const [safeSearch, setSafeSearch] = useState<boolean>(false);
 
     const { data: myChannel } = useGetMyChannelQuery();
+
     const { data: subscriptions = [] } = useGetSubscriptionsQuery(undefined, {
         skip: !myChannel
     });
 
-    // Вычисляем minDuration и maxDuration для запроса
     let minDuration: number | undefined = undefined;
     let maxDuration: number | undefined = undefined;
 
-    if (duration === "short") maxDuration = 240; // До 4 мин (240 сек)
-    else if (duration === "medium") { minDuration = 240; maxDuration = 1200; } // 4-20 мин
-    else if (duration === "long") minDuration = 1200; // От 20 мин
+    if (duration === "short") maxDuration = 240;
+    else if (duration === "medium") { minDuration = 240; maxDuration = 1200; }
+    else if (duration === "long") minDuration = 1200;
 
     const { data: videosData, isLoading: isVidLoading, isError: isVidError } = useSearchVideosQuery(
-        {
-            query,
-            page: 1,
-            pageSize: 20,
-            sortBy,
-            minDuration,
-            maxDuration,
-            safeSearch
-        },
+        { query, page: 1, pageSize: 20, sortBy, minDuration, maxDuration, safeSearch },
         { skip: !query }
     );
 
@@ -227,14 +209,12 @@ function SearchResultsContent() {
     const videos = videosData?.videos || [];
     const isLoading = isVidLoading || isChanLoading;
     const isError = isVidError;
-
     const noResults = !isLoading && channels.length === 0 && videos.length === 0;
 
     return (
         <div className="min-h-screen bg-[#0F0F0F] text-white pt-[72px] px-4 md:px-8 lg:px-12">
             <div className="max-w-[1096px] mx-auto py-6">
 
-                {/* Кнопка открытия фильтров */}
                 <div className="flex items-center justify-end pb-4 mb-2 border-b border-[#3F3F3F]/50">
                     <button
                         onClick={() => setIsFilterModalOpen(true)}
@@ -245,7 +225,6 @@ function SearchResultsContent() {
                     </button>
                 </div>
 
-                {/* === МОДАЛЬНОЕ ОКНО ФИЛЬТРОВ === */}
                 {isFilterModalOpen && (
                     <div
                         className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[2px] p-4 animate-in fade-in duration-200"
@@ -266,8 +245,6 @@ function SearchResultsContent() {
                             </div>
 
                             <div className="p-8 flex flex-col md:flex-row gap-8 md:gap-16 overflow-y-auto max-h-[70vh]">
-
-                                {/* КОЛОНКА 1: Длительность */}
                                 <div className="flex-1 flex flex-col gap-6">
                                     <h4 className="text-[13px] font-medium text-white uppercase border-b border-[#3F3F3F] pb-3">
                                         Duration
@@ -279,18 +256,15 @@ function SearchResultsContent() {
                                     </div>
                                 </div>
 
-                                {/* КОЛОНКА 2: Особенности */}
                                 <div className="flex-1 flex flex-col gap-6">
                                     <h4 className="text-[13px] font-medium text-white uppercase border-b border-[#3F3F3F] pb-3">
                                         Features
                                     </h4>
                                     <div className="flex flex-col gap-5">
                                         <FilterItem label="Safe Search" active={safeSearch} onClick={() => setSafeSearch(!safeSearch)} />
-                                        {/* В будущем сюда можно добавить 4K, Subtitles и т.д. */}
                                     </div>
                                 </div>
 
-                                {/* КОЛОНКА 3: Сортировка */}
                                 <div className="flex-1 flex flex-col gap-6">
                                     <h4 className="text-[13px] font-medium text-white uppercase border-b border-[#3F3F3F] pb-3">
                                         Sort by
@@ -302,7 +276,6 @@ function SearchResultsContent() {
                                         <FilterItem label="Rating" active={sortBy === 2} onClick={() => setSortBy(2)} />
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -326,7 +299,6 @@ function SearchResultsContent() {
                 )}
 
                 <div className="flex flex-col gap-2">
-
                     {channels.map((channel) => (
                         <ChannelSearchItem
                             key={channel.id}
@@ -340,7 +312,6 @@ function SearchResultsContent() {
                     <div className="flex flex-col gap-4 mt-4">
                         {videos.map((video) => (
                             <Link href={`/watch/${video.id}`} key={video.id} className="flex flex-col sm:flex-row gap-4 group cursor-pointer max-w-full">
-
                                 <div className="relative w-full sm:w-[360px] sm:min-w-[360px] aspect-video bg-[#272727] rounded-xl overflow-hidden shrink-0">
                                     <img
                                         src={video.thumbnailUrl || "/placeholder.jpg"}
@@ -387,7 +358,6 @@ function SearchResultsContent() {
                             </Link>
                         ))}
                     </div>
-
                 </div>
             </div>
         </div>

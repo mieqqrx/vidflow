@@ -49,8 +49,14 @@ export const videoApi = apiSlice.injectEndpoints({
                 : [{ type: "Video", id: "LIST" }],
         }),
 
-        getSubscriptionVideos: builder.query<Video[], void>({
-            query: () => "/videos/feed/subscriptions",
+        getSubscriptionVideos: builder.query<Video[], { limit?: number } | void>({
+            query: (params) => {
+                let url = "/videos/feed/subscriptions";
+                if (params?.limit) {
+                    url += `?limit=${params.limit}`;
+                }
+                return url;
+            },
             providesTags: ["Video"],
         }),
 

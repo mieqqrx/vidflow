@@ -1,5 +1,5 @@
 import { apiSlice } from "./apiSlice";
-import { Channel, CreateChannelRequest } from "@/types";
+import {Channel, CreateChannelRequest, Subscription} from "@/types";
 
 export const channelApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
@@ -45,7 +45,7 @@ export const channelApi = apiSlice.injectEndpoints({
             invalidatesTags: (result, error, arg) => [{ type: "Channel", id: arg.id }],
         }),
 
-        getSubscriptions: builder.query<Channel[], void>({
+        getSubscriptions: builder.query<Subscription[], void>({
             query: () => "/subscriptions",
             providesTags: ["Channel"],
         }),
@@ -55,7 +55,7 @@ export const channelApi = apiSlice.injectEndpoints({
                 url: `/subscriptions/${channelId}`,
                 method: "POST",
             }),
-            invalidatesTags: ["Channel"],
+            invalidatesTags: ["Channel", "Video"],
         }),
 
         unsubscribeFromChannel: builder.mutation<void, string>({
