@@ -20,5 +20,6 @@ namespace Youtube.Services
         Task<IEnumerable<VideoResponseDto>> GetShortsAsync(int page, int pageSize);
         Task<IEnumerable<VideoResponseDto>> GetChannelShortsAsync(Guid channelId, Guid? userId = null);
         Task<(bool Success, string Message)> AdminSetVisibilityAsync(Guid videoId, VideoVisibility visibility);
+        Task<IEnumerable<VideoResponseDto>> GetSubscriptionVideosAsync(Guid userId, int limit);
     }
 }

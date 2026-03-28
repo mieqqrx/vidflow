@@ -172,4 +172,13 @@ public class VideoController : ControllerBase
         var shorts = await _videoService.GetChannelShortsAsync(channelId);
         return Ok(shorts);
     }
+
+    [Authorize]
+    [HttpGet("feed/subscriptions")]
+    public async Task<IActionResult> GetSubscriptionVideos([FromQuery] int limit = 50)
+    {
+        var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var videos = await _videoService.GetSubscriptionVideosAsync(userId, limit);
+        return Ok(videos);
+    }
 }
