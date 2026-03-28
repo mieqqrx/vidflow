@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux"; // Добавили dispatch
-import { setActiveUser, clearActiveUser } from "@/store/authSlice"; // Твой экшен
+import { setActiveUser, clearActiveUser } from "@/store/slices/authSlice"; // Твой экшен
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
     DropdownMenu,

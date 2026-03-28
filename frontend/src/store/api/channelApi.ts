@@ -33,7 +33,7 @@ export const channelApi = apiSlice.injectEndpoints({
                 method: "PUT",
                 body: formData,
             }),
-            invalidatesTags: ["Channel", "User"],
+            invalidatesTags: ["Channel", "User", "Video"],
         }),
 
         setFeaturedVideo: builder.mutation<{ message: string }, { id: string; videoId: string | null }>({

@@ -13,6 +13,9 @@ import {
 import SaveToPlaylistModal from "@/components/Playlist/SaveToPlaylistModal";
 import ReportVideoModal from "@/components/Report/ReportVideoModal";
 
+// ИМПОРТ УТИЛИТЫ ДЛЯ КАРТИНОК
+import { fixUrl } from "@/utils/fixUrl";
+
 export interface VideoProps {
     id: string | number;
     thumbnail: string | null;
@@ -60,7 +63,7 @@ export default function VideoCard({
         <div className="flex flex-col gap-3 group w-full relative">
             <Link href={`/watch/${id}`} className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#212121] border border-[#3F3F3F] block">
                 <img
-                    src={thumbnail || "/placeholder.jpg"}
+                    src={fixUrl(thumbnail) || "/placeholder.jpg"}
                     alt={title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
                 />
@@ -85,7 +88,8 @@ export default function VideoCard({
                 {!hideAvatar && (
                     <Link href={`/channel/${channelId}`} className="shrink-0 mt-0.5">
                         <Avatar className="h-9 w-9 rounded-full">
-                            <AvatarImage src={channelAvatar || undefined} />
+                            {/* ИСПОЛЬЗУЕМ fixUrl ЗДЕСЬ */}
+                            <AvatarImage src={fixUrl(channelAvatar) || undefined} />
 
                             <AvatarFallback className="bg-purple-600 text-xs text-white">
                                 {firstLetter}
@@ -125,8 +129,8 @@ export default function VideoCard({
                                 <MoreVertical className="w-5 h-5" />
                             </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 bg-[#282828] border-[#3f3f3f] text-white rounded-xl shadow-2xl p-2 z-50">
 
+                        <DropdownMenuContent align="end" className="w-56 bg-[#282828] border-[#3f3f3f] text-white rounded-xl shadow-2xl p-2 z-50">
                             <DropdownMenuItem className="cursor-pointer hover:bg-[#3f3f3f] focus:bg-[#3f3f3f] rounded-lg text-[14px] py-2.5">
                                 <Clock className="w-4 h-4 mr-3" />
                                 Save to Watch Later
@@ -141,7 +145,6 @@ export default function VideoCard({
                                 <Flag className="w-4 h-4 mr-3 text-[#AAAAAA]" />
                                 Report
                             </DropdownMenuItem>
-
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

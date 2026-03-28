@@ -17,9 +17,11 @@
                 _notificationService = notificationService;
             }
 
-            public async Task<(bool Success, string Message, CommentResponseDto? Comment)> CreateCommentAsync(
-                Guid userId, CreateCommentDto dto)
+            public async Task<(bool Success, string Message, CommentResponseDto? Comment)> CreateCommentAsync(Guid userId, CreateCommentDto dto)
             {
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null)
+                    return (false, "User not found", null);
                 var videoExists = await _context.Videos.AnyAsync(v => v.Id == dto.VideoId);
                 if (!videoExists)
                     return (false, "Video not found", null);
@@ -54,8 +56,6 @@
                 }
 
                 await _notificationService.NotifyMentionsAsync(comment, dto.Text);
-
-                var user = await _context.Users.FindAsync(userId);
 
                 var response = new CommentResponseDto
                 {

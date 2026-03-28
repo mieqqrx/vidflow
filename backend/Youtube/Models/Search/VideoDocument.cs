@@ -15,6 +15,7 @@ namespace Youtube.Models.Search
         public string? ThumbnailUrl { get; set; }
         public double DurationSeconds { get; set; }
         public int ViewsCount { get; set; }
+        public double WatchedPercent { get; set; }
         public int LikesCount { get; set; }
         public int CommentsCount { get; set; }
 

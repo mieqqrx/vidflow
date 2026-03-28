@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Video } from "@/types";
 import { formatDistanceToNow } from "date-fns";
+import { fixUrl } from "@/utils/fixUrl";
 
 interface ChannelFeaturedProps {
     video: Video;
@@ -19,12 +20,12 @@ export default function ChannelFeatured({ video }: ChannelFeaturedProps) {
 
     return (
         <Link
-            href={`/video/${video.id}`}
+            href={`/watch/${video.id}`}
             className="flex flex-col md:flex-row gap-6 mb-8 group cursor-pointer no-underline"
         >
             <div className="w-full md:w-[420px] lg:w-[500px] xl:w-[600px] aspect-video relative rounded-xl overflow-hidden bg-black shrink-0 shadow-lg">
                 <img
-                    src={video.thumbnailUrl || "/placeholder.jpg"}
+                    src={fixUrl(video.thumbnailUrl) || "/placeholder.jpg"}
                     alt={video.title}
                     className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300"
                 />

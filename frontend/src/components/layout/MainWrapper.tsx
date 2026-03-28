@@ -2,9 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
+import { useAppSelector } from "@/store/hooks";
 
 export default function MainWrapper({ children }: { children: ReactNode }) {
     const pathname = usePathname();
+    const { isOpen } = useAppSelector((state) => state.sidebar);
 
     if (pathname?.startsWith("/admin")) {
         return <>{children}</>;
@@ -17,19 +19,21 @@ export default function MainWrapper({ children }: { children: ReactNode }) {
     const isAuthPage = pathname === "/login" || pathname === "/register";
     const isHistoryPage = pathname?.includes("/history");
     const isLiveStreamPage = pathname?.startsWith("/live");
+    const isChannelPage = pathname?.startsWith("/channel");
 
-    const isSidebarHidden = isWatchPage || isAuthPage;
+    const isOverlayPage = isWatchPage || isAuthPage;
 
     return (
         <main
-            className={
-                `min-h-screen ${
-                    isWatchPage || isSearchPage || isPlaylistPage || isStudioPage || isHistoryPage || isLiveStreamPage
-                    ? "pt-0" 
-                    : "pt-14"} ${isSidebarHidden ? "" 
-                    : "md:ml-[240px]"
-                }`
-            }
+            className={`min-h-screen transition-[margin] duration-200 ease-in-out ${
+                isWatchPage || isSearchPage || isPlaylistPage
+                || isStudioPage || isHistoryPage || isLiveStreamPage
+                || isChannelPage
+                    ? "pt-0"
+                    : "pt-14"
+            } ${
+                !isOverlayPage ? (isOpen ? "md:ml-[240px]" : "md:ml-[72px]") : "md:ml-0"
+            }`}
         >
             {children}
         </main>

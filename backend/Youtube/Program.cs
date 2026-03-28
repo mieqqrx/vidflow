@@ -117,6 +117,7 @@ builder.Services.AddScoped<ILiveStreamService, LiveStreamService>();
 
 
 var app = builder.Build();
+app.UseCors("DevPolicy");
 
 app.Use(async (context, next) =>
 {
@@ -145,15 +146,21 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger(options => { });
 app.UseSwaggerUI();
 
-app.UseCors("DevPolicy");
-app.UseWhen(
-    context => !context.Request.Path.StartsWithSegments("/api/streams/on-publish") &&
-               !context.Request.Path.StartsWithSegments("/api/streams/on-publish-done") &&
-               !context.Request.Path.StartsWithSegments("/api/streams/on-record-done"),
-    appBuilder => appBuilder.UseHttpsRedirection()
-);
+// app.UseWhen(
+//     context => !context.Request.Path.StartsWithSegments("/api/streams/on-publish") &&
+//                !context.Request.Path.StartsWithSegments("/api/streams/on-publish-done") &&
+//                !context.Request.Path.StartsWithSegments("/api/streams/on-record-done"),
+//     appBuilder => appBuilder.UseHttpsRedirection()
+// );
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

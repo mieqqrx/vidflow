@@ -143,7 +143,6 @@ export default function ShortsTab({ channelId }: { channelId: string }) {
                                         <div className="flex gap-4 min-w-0 items-center">
                                             <div className="relative w-[45px] h-[80px] shrink-0 bg-black rounded overflow-hidden shadow-md">
                                                 <img
-                                                    // ИСПОЛЬЗУЕМ fixUrl ЗДЕСЬ
                                                     src={fixUrl(video.thumbnailUrl) || "/placeholder.jpg"}
                                                     alt={video.title}
                                                     className="w-full h-full object-cover"
