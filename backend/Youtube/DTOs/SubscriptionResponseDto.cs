@@ -9,5 +9,6 @@
         public int SubscribersCount { get; set; }
         public bool NotificationEnabled { get; set; }
         public DateTime SubscribedAt { get; set; }
+        public string? ChannelAvatarUrl { get; set; }
     }
 }
