@@ -66,7 +66,7 @@ namespace Youtube.Tests
                 NewPassword = "new_password123"
             };
             var (success, message) = await service.ChangePasswordAsync(userId, changePasswordDto);
-            Assert.True(success);
+            Assert.False(success); 
             Assert.Equal("Current password is incorrect", message);
         }
 

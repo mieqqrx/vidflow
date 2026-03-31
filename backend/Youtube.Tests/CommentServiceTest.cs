@@ -116,7 +116,7 @@ namespace Youtube.Tests
             var result = await service.DeleteCommentAsync(userId, mainComment.Id);
             Assert.True(result.Success);
             await context.Entry(video).ReloadAsync();
-            Assert.Equal(1, video.CommentsCount); // 0 
+            Assert.Equal(0, video.CommentsCount);
             Assert.Empty(context.Comments);
         }
     }
