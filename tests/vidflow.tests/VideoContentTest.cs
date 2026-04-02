@@ -95,11 +95,11 @@ namespace vidflow.tests
 
             var commentXPath = $"//*[text()='{mycomment}']/ancestor::div[contains(@class, 'flex-col')][1]/ancestor::div[contains(@class, 'flex')][1]";
             var myCommentContainer = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(commentXPath)));
+         
             var deleteBtn = myCommentContainer.FindElement(By.CssSelector("button[title='Delete']"));
             ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", deleteBtn);
             _wait.Until(ExpectedConditions.AlertIsPresent());
             IAlert alert = _driver.SwitchTo().Alert();
-            Console.WriteLine($"Текст вікна: {alert.Text}");
             alert.Accept();
             _wait.Until(ExpectedConditions.InvisibilityOfElementLocated(By.XPath($"//*[text()='{mycomment}']")));
             Assert.True(true);
