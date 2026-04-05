@@ -53,11 +53,11 @@ export default function VideosTab({ channelId }: { channelId: string }) {
                                 <div className="flex gap-4 min-w-0">
                                     <div className="relative w-[120px] h-[68px] shrink-0 bg-black rounded overflow-hidden">
                                         <img
-                                            // ИСПОЛЬЗУЕМ ИМПОРТИРОВАННУЮ ФУНКЦИЮ ЗДЕСЬ
                                             src={fixUrl(video.thumbnailUrl) || "/placeholder.jpg"}
                                             alt={video.title}
                                             className="w-full h-full object-cover"
                                         />
+
                                         <span className="absolute bottom-1 right-1 bg-black/80 px-1 rounded text-[10px] font-medium">
                                             {video.durationSeconds ? `${Math.floor(video.durationSeconds / 60)}:${Math.floor(video.durationSeconds % 60).toString().padStart(2, '0')}` : "0:00"}
                                         </span>
@@ -68,6 +68,7 @@ export default function VideosTab({ channelId }: { channelId: string }) {
                                             <h3 className="text-[14px] font-medium truncate pr-4" title={video.title}>
                                                 {video.title}
                                             </h3>
+
                                             <p className="text-[12px] text-[#aaaaaa] truncate pr-4 mt-0.5">
                                                 {video.description || "No description"}
                                             </p>
@@ -77,9 +78,11 @@ export default function VideosTab({ channelId }: { channelId: string }) {
                                             <Link href={`/studio/video/${video.id}`} className="text-[#aaaaaa] hover:text-white cursor-pointer" title="Edit">
                                                 <Pen className="w-[18px] h-[18px]" />
                                             </Link>
+
                                             <Link href={`/watch/${video.id}`} className="text-[#aaaaaa] hover:text-white cursor-pointer block" title="Watch on platform">
                                                 <ExternalLink className="w-[18px] h-[18px]" />
                                             </Link>
+
                                             <button
                                                 onClick={() => setVideoToDelete({ id: video.id, title: video.title })}
                                                 className="text-[#aaaaaa] hover:text-red-500 transition-colors cursor-pointer"
@@ -108,6 +111,7 @@ export default function VideosTab({ channelId }: { channelId: string }) {
 
                                 <div className="text-[13px]">{video.viewsCount?.toLocaleString() || 0}</div>
                                 <div className="text-[13px]">{video.commentsCount?.toLocaleString() || 0}</div>
+
                                 <div className="text-[13px] flex items-center gap-1">
                                     <span>{video.likesCount?.toLocaleString() || 0}</span>
                                     <span className="text-[#aaaaaa] text-[11px] mx-1">/</span>
@@ -127,12 +131,15 @@ export default function VideosTab({ channelId }: { channelId: string }) {
                                 <AlertTriangle className="w-6 h-6 text-red-500" />
                                 Permanently delete this video?
                             </h2>
+
                             <p className="text-[14px] text-[#aaaaaa] mb-4 line-clamp-2">
                                 <span className="text-white font-medium">{videoToDelete.title}</span>
                             </p>
+
                             <div className="bg-[#1f1f1f] p-4 rounded-lg text-[13px] text-[#aaaaaa] mb-6 border border-[#3f3f3f]">
                                 Permanent deletion cannot be undone. The video will be removed from the platform and all its comments and views will be lost.
                             </div>
+
                             <div className="flex justify-end gap-3">
                                 <Button variant="ghost" onClick={() => setVideoToDelete(null)} className="hover:bg-[#3f3f3f] text-white cursor-pointer" disabled={isDeleting}>Cancel</Button>
                                 <Button onClick={handleDeleteVideo} className="bg-red-600 hover:bg-red-700 text-white cursor-pointer" disabled={isDeleting}>

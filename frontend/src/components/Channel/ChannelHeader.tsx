@@ -94,6 +94,7 @@ export default function ChannelHeader({ channel, isOwner, activeTab, setActiveTa
                             src={(channel.ownerAvatarUrl || channel.avatarUrl) ? `${channel.ownerAvatarUrl || channel.avatarUrl}?t=${new Date().getTime()}` : undefined}
                             className="object-cover"
                         />
+
                         <AvatarFallback className="bg-purple-600 text-3xl">{firstLetter}</AvatarFallback>
                     </Avatar>
 
@@ -110,6 +111,7 @@ export default function ChannelHeader({ channel, isOwner, activeTab, setActiveTa
                                 <span className="text-[#AAAAAA] line-clamp-1 max-w-[400px]">
                                     {channel.description || "More about this channel"}
                                 </span>
+
                                 <span className="font-bold group-hover:text-white">...more</span>
                             </div>
                         </div>
@@ -195,6 +197,7 @@ export default function ChannelHeader({ channel, isOwner, activeTab, setActiveTa
                     >
                         <div className="flex items-center justify-between p-6 pb-4">
                             <h2 className="text-[20px] font-bold text-white">About {channel.name}</h2>
+
                             <button
                                 onClick={() => setIsAboutModalOpen(false)}
                                 className="p-2 hover:bg-[#3F3F3F] rounded-full transition-colors text-white"
@@ -216,6 +219,7 @@ export default function ChannelHeader({ channel, isOwner, activeTab, setActiveTa
 
                                 <div className="flex items-center gap-4 text-[14px]">
                                     <Globe className="w-5 h-5 text-white shrink-0" />
+
                                     <a href={`/channel/${channel.id}`} className="hover:text-[#3ea6ff] transition-colors truncate">
                                         {channelUrl}
                                     </a>

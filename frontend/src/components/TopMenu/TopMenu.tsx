@@ -19,6 +19,7 @@ export default function TopMenu() {
                     {categories.map((category, index) => (
                         <button
                             key={category}
+
                             className={cn(
                                 "h-8 px-3 rounded-lg text-[14px] font-medium transition-colors duration-200 flex-shrink-0 cursor-pointer border border-transparent snap-start",
                                 index === 0

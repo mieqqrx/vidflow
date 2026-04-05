@@ -111,7 +111,6 @@ function WatchContent() {
     const { data: myChannel } = useGetMyChannelQuery();
     const isOwner = myChannel?.id === video?.channelId;
 
-    // === ПОЛУЧАЕМ ПОХОЖИЕ ВИДЕО ИЗ ELASTICSEARCH ===
     const { data: similarVideosData } = useGetSimilarVideosQuery(
         { videoId, count: 15 },
         { skip: !videoId }
@@ -356,6 +355,7 @@ function WatchContent() {
                                             className={`w-[18px] h-[18px] transition-colors duration-200 ${isLiked ? "fill-white text-white" : "text-white group-hover:text-gray-200"}`}
                                         />
                                     </motion.div>
+
                                     <span className="text-sm font-medium">{formattedLikes}</span>
                                 </button>
 
@@ -401,6 +401,7 @@ function WatchContent() {
                                         <MoreHorizontal className="w-5 h-5" />
                                     </Button>
                                 </DropdownMenuTrigger>
+
                                 <DropdownMenuContent align="end" className="w-48 bg-[#282828] border-[#3f3f3f] text-white rounded-xl shadow-2xl p-2 mt-2 z-50">
                                     <DropdownMenuItem onClick={() => setIsReportModalOpen(true)} className="cursor-pointer hover:bg-[#3f3f3f] focus:bg-[#3f3f3f] rounded-lg text-[14px] py-2.5">
                                         <Flag className="w-4 h-4 mr-3 text-[#AAAAAA]" />
@@ -408,7 +409,6 @@ function WatchContent() {
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
-
                         </div>
                     </div>
 

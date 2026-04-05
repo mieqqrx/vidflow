@@ -16,7 +16,6 @@ function PlaylistContent() {
     const { data: myPlaylists, isLoading: isPlaylistsLoading } = useGetMyPlaylistsQuery();
     const [updatePlaylist] = useUpdatePlaylistMutation();
 
-    // Состояние для нашего кастомного меню
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     const targetPlaylistId = useMemo(() => {
@@ -70,14 +69,13 @@ function PlaylistContent() {
     return (
         <div className="min-h-screen bg-[#0F0F0F] text-white flex justify-center pt-20 pb-6 px-4 md:px-8">
             <div className="flex flex-col xl:flex-row max-w-[1400px] w-full gap-8">
-
-                {/* ЛЕВАЯ ПАНЕЛЬ */}
                 <div className="w-full xl:w-[360px] shrink-0">
                     <div className="relative w-full rounded-2xl overflow-hidden flex flex-col xl:min-h-[calc(100vh-100px)] xl:sticky xl:top-[80px] shadow-2xl border border-white/5 bg-[#121212]">
                         <div
                             className="absolute inset-0 bg-cover bg-center blur-3xl opacity-40 scale-125 pointer-events-none"
                             style={{ backgroundImage: `url(${heroThumbnail})` }}
                         />
+
                         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-[#0F0F0F] pointer-events-none" />
 
                         <div className="relative z-10 p-6 flex flex-col items-center xl:items-start text-center xl:text-left h-full">
@@ -85,6 +83,7 @@ function PlaylistContent() {
                                 {playlist.videoCount > 0 ? (
                                     <>
                                         <img src={heroThumbnail} alt={title} className="w-full h-full object-cover" />
+
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
                                             <Play className="w-12 h-12 text-white fill-white" />
                                         </div>
@@ -103,7 +102,6 @@ function PlaylistContent() {
                             <h3 className="text-[15px] font-medium text-white mb-2">Your channel</h3>
 
                             <div className="text-[12px] text-[#aaaaaa] flex flex-wrap items-center justify-center xl:justify-start gap-y-1 gap-x-1.5 mb-6">
-                                {/* ИНТЕРАКТИВНЫЙ БЕЙДЖ ВИДИМОСТИ */}
                                 {isSystem ? (
                                     <span className="flex items-center gap-1 bg-[#272727] px-2 py-1.5 rounded-md text-[#aaaaaa] cursor-not-allowed" title="System playlists are always private">
                                         <Lock className="w-3.5 h-3.5" />
@@ -123,6 +121,7 @@ function PlaylistContent() {
                                         {isDropdownOpen && (
                                             <>
                                                 <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+
                                                 <div className="absolute top-full left-0 mt-1.5 bg-[#212121] border border-[#3f3f3f] text-white rounded-xl shadow-2xl w-[140px] z-50 py-1.5 animate-in fade-in zoom-in-95 duration-100">
                                                     <div
                                                         onClick={() => { handleVisibilityChange(false); setIsDropdownOpen(false); }}
@@ -131,6 +130,7 @@ function PlaylistContent() {
                                                         <Globe className="w-4 h-4 mr-2.5 text-[#aaaaaa]" />
                                                         <span className="text-[14px]">Public</span>
                                                     </div>
+
                                                     <div
                                                         onClick={() => { handleVisibilityChange(true); setIsDropdownOpen(false); }}
                                                         className={`flex items-center px-4 py-2.5 cursor-pointer transition-colors ${playlist.isPrivate ? 'bg-[#3f3f3f]/80' : 'hover:bg-[#3f3f3f]/50'}`}
@@ -160,7 +160,6 @@ function PlaylistContent() {
                                     </Button>
                                 </Link>
 
-                                {/* Для Shuffle можно пока сделать то же самое, либо написать логику рандома позже */}
                                 <Link
                                     href={playlist.videoCount > 0 ? `/watch/${playlist.videos[Math.floor(Math.random() * playlist.videos.length)].videoId}?list=${playlist.id}` : "#"}
                                     className="flex-1"
@@ -174,7 +173,6 @@ function PlaylistContent() {
                     </div>
                 </div>
 
-                {/* ПРАВАЯ ПАНЕЛЬ */}
                 <div className="flex-1 flex flex-col gap-2 min-w-0 pb-20">
                     {playlist.videos.length === 0 ? (
                         <div className="text-center mt-20 flex flex-col items-center">
@@ -183,6 +181,7 @@ function PlaylistContent() {
                                     <ListVideo className="w-16 h-16 text-[#3f3f3f] mb-4" />}
 
                             <h2 className="text-xl font-medium text-white mb-1">No videos in this playlist yet</h2>
+
                             <p className="text-[#aaaaaa] text-[14px]">
                                 {isLiked ? "Videos you like will show up here." : "Save videos to this playlist to watch them later."}
                             </p>

@@ -172,6 +172,7 @@ export default function CommentItem(props: CommentProps) {
                                     {safeUserName}
                                 </span>
                             </Link>
+
                             <span className="text-[#AAAAAA] text-xs shrink-0">{timeAgo}</span>
                         </div>
 
@@ -238,6 +239,7 @@ export default function CommentItem(props: CommentProps) {
                             <ThumbsUp
                                 className={`${depth > 0 ? 'w-3 h-3' : 'w-4 h-4'} ${isLiked ? "fill-white text-white" : "text-white"}`}
                             />
+
                             <span className="text-[#AAAAAA] text-xs font-medium">{likesCount ?? 0}</span>
                         </div>
 
@@ -248,6 +250,7 @@ export default function CommentItem(props: CommentProps) {
                             <ThumbsDown
                                 className={`${depth > 0 ? 'w-3 h-3' : 'w-4 h-4'} ${isDisliked ? "fill-white text-white" : "text-white"}`}
                             />
+
                             <span className="text-[#AAAAAA] text-xs font-medium">{dislikesCount ?? 0}</span>
                         </div>
 

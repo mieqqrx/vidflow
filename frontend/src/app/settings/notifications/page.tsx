@@ -29,13 +29,12 @@ export default function NotificationsSettingsPage() {
 
     const [updateSettings] = useUpdateUserSettingsMutation();
 
-    // Добавили настройку для Live Stream
     const [settings, setSettings] = useState({
         notifyOnNewVideo: true,
         notifyOnVideoReady: true,
         notifyOnCommentReply: true,
         notifyOnMention: true,
-        notifyOnLiveStream: true, // <--- НОВОЕ ПОЛЕ
+        notifyOnLiveStream: true,
     });
 
     const [isSaving, setIsSaving] = useState(false);
@@ -47,7 +46,7 @@ export default function NotificationsSettingsPage() {
                 notifyOnVideoReady: user.notifyOnVideoReady ?? true,
                 notifyOnCommentReply: user.notifyOnCommentReply ?? true,
                 notifyOnMention: user.notifyOnMention ?? true,
-                notifyOnLiveStream: user.notifyOnLiveStream ?? true, // <--- НОВОЕ ПОЛЕ
+                notifyOnLiveStream: user.notifyOnLiveStream ?? true,
             });
         }
     }, [user]);
@@ -64,7 +63,6 @@ export default function NotificationsSettingsPage() {
             toast.success("Settings saved");
         } catch (error) {
             console.error("Failed to save settings", error);
-            // Откатываем UI, если сервер выдал ошибку
             setSettings(settings);
             toast.error("Failed to save settings. Please try again.");
         } finally {
@@ -84,6 +82,7 @@ export default function NotificationsSettingsPage() {
         <div className="min-h-screen bg-[#0F0F0F] text-white pt-20 pb-10 px-4 md:px-8">
             <div className="max-w-[800px] mx-auto">
                 <h1 className="text-[24px] font-bold mb-1">Notifications</h1>
+
                 <p className="text-[14px] text-[#aaaaaa] mb-8">
                     Choose how and when you want to be notified.
                 </p>
@@ -99,10 +98,12 @@ export default function NotificationsSettingsPage() {
                                 <span className="text-[15px] font-medium text-white mb-0.5">
                                     Subscriptions
                                 </span>
+
                                 <span className="text-[13px] text-[#aaaaaa]">
                                     Notify me about activity from the channels I'm subscribed to.
                                 </span>
                             </div>
+
                             <div className="pt-1">
                                 <ToggleSwitch
                                     checked={settings.notifyOnNewVideo}
@@ -112,16 +113,17 @@ export default function NotificationsSettingsPage() {
                             </div>
                         </div>
 
-                        {/* === НОВЫЙ БЛОК ДЛЯ ТРАНСЛЯЦИЙ === */}
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex flex-col">
                                 <span className="text-[15px] font-medium text-white mb-0.5">
                                     Live streams
                                 </span>
+
                                 <span className="text-[13px] text-[#aaaaaa]">
                                     Notify me when a channel I'm subscribed to goes live.
                                 </span>
                             </div>
+
                             <div className="pt-1">
                                 <ToggleSwitch
                                     checked={settings.notifyOnLiveStream}
@@ -136,10 +138,12 @@ export default function NotificationsSettingsPage() {
                                 <span className="text-[15px] font-medium text-white mb-0.5">
                                     Video processing
                                 </span>
+
                                 <span className="text-[13px] text-[#aaaaaa]">
                                     Notify me when my uploaded video has finished processing and is ready.
                                 </span>
                             </div>
+
                             <div className="pt-1">
                                 <ToggleSwitch
                                     checked={settings.notifyOnVideoReady}
@@ -162,6 +166,7 @@ export default function NotificationsSettingsPage() {
                                 <span className="text-[15px] font-medium text-white mb-0.5">
                                     Replies to my comments
                                 </span>
+
                                 <span className="text-[13px] text-[#aaaaaa]">
                                     Notify me when someone replies to my comments.
                                 </span>
@@ -180,10 +185,12 @@ export default function NotificationsSettingsPage() {
                                 <span className="text-[15px] font-medium text-white mb-0.5">
                                     Mentions
                                 </span>
+
                                 <span className="text-[13px] text-[#aaaaaa]">
                                     Notify me when others mention my channel.
                                 </span>
                             </div>
+
                             <div className="pt-1">
                                 <ToggleSwitch
                                     checked={settings.notifyOnMention}

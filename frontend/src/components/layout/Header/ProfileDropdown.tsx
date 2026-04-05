@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux"; // Добавили dispatch
-import { setActiveUser, clearActiveUser } from "@/store/slices/authSlice"; // Твой экшен
+import { useDispatch } from "react-redux";
+import { setActiveUser, clearActiveUser } from "@/store/slices/authSlice";
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import {
     DropdownMenu,
@@ -41,7 +41,6 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
     const [logoutAll] = useLogoutAllMutation();
     const { data: myChannel, isLoading: isChannelLoading } = useGetMyChannelQuery();
 
-    // Получаем реальные активные сессии с бэкенда
     const { data: sessions = [] } = useGetSessionsQuery();
 
     const username = user.username || "User";
@@ -49,7 +48,6 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
     const avatarUrl = myChannel?.avatarUrl || user.avatarUrl || null;
     const firstLetter = username?.[0]?.toUpperCase() || "U";
 
-    // Установка активного юзера при первой загрузке, если он еще не установлен
     useEffect(() => {
         if (user.id) {
             dispatch(setActiveUser(user.id));
@@ -58,23 +56,18 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
 
     const handleSwitchAccount = (userId: string) => {
         dispatch(setActiveUser(userId));
-        // Делаем полный релоад страницы, чтобы сбросился весь кэш (видео, история, канал)
         window.location.href = "/";
     };
 
     const handleAddAccount = () => {
-        // Чтобы залогиниться в новый аккаунт, переходим на логин.
-        // Бэкенд запишет новую куку и не тронет старые.
         router.push("/login");
     };
 
     const handleLogout = async () => {
         try {
             await logout().unwrap();
-            // Если вышли, проверяем, остались ли еще сессии
             const remainingSessions = sessions.filter(s => s.id !== user.id);
             if (remainingSessions.length > 0) {
-                // Автоматически переключаемся на следующий доступный аккаунт
                 dispatch(setActiveUser(remainingSessions[0].id));
             } else {
                 dispatch(clearActiveUser());
@@ -105,6 +98,7 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
             <DropdownMenuTrigger asChild>
                 <Avatar className="h-8 w-8 cursor-pointer ml-2 hover:opacity-80 transition select-none">
                     <AvatarImage src={avatarUrl || undefined} />
+
                     <AvatarFallback className="bg-purple-600 text-white text-xs">
                         {firstLetter}
                     </AvatarFallback>
@@ -117,6 +111,7 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
                         <div className="px-4 py-3 flex gap-4 items-start">
                             <Avatar className="h-10 w-10 cursor-pointer">
                                 <AvatarImage src={avatarUrl || undefined} />
+
                                 <AvatarFallback className="bg-purple-600 text-white text-sm">
                                     {firstLetter}
                                 </AvatarFallback>
@@ -209,6 +204,7 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
                             >
                                 <ChevronLeft className="w-6 h-6 text-white" />
                             </button>
+
                             <span className="text-[16px] font-medium">Accounts</span>
                         </div>
 
@@ -217,6 +213,7 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
                         <div className="flex flex-col max-h-[300px] overflow-y-auto custom-scrollbar">
                             {sessions.map((acc) => {
                                 const isCurrent = acc.id === user.id;
+
                                 return (
                                     <DropdownMenuItem
                                         key={acc.id}
@@ -235,6 +232,7 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
 
                                         <Avatar className="h-9 w-9 mr-3">
                                             <AvatarImage src={acc.avatarUrl || undefined} />
+
                                             <AvatarFallback className="bg-purple-600 text-white text-xs">
                                                 {acc.username?.[0]?.toUpperCase() || "U"}
                                             </AvatarFallback>
@@ -268,9 +266,11 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
                                 className="cursor-pointer hover:!bg-[#3e3e3e] py-3 px-4 focus:bg-[#3e3e3e] focus:text-white text-[#3ea6ff] hover:text-[#6ebcff]"
                             >
                                 <div className="w-6 mr-4 flex justify-center"></div>
+
                                 <div className="mr-3 p-1 flex items-center justify-center h-9 w-9">
                                     <LogOut className="w-5 h-5" />
                                 </div>
+
                                 <span className="text-[15px]">Sign out of all accounts</span>
                             </DropdownMenuItem>
                         )}

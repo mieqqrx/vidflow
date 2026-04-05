@@ -57,6 +57,7 @@ export default function AdminContentPage() {
                 <form onSubmit={handleSearch} className="flex items-center w-full md:w-auto">
                     <div className="flex items-center bg-[#121212] border border-[#3F3F3F] rounded-lg px-4 h-10 w-full md:w-[300px] focus-within:border-[#3ea6ff] transition-colors">
                         <Search className="w-4 h-4 text-[#AAAAAA] mr-2 shrink-0" />
+
                         <input
                             type="text"
                             placeholder="Search videos by title..."
@@ -75,26 +76,31 @@ export default function AdminContentPage() {
                     ) : data?.videos && data.videos.length > 0 ? (
                         <table className="w-full text-left border-collapse min-w-[1000px]">
                             <thead>
-                            <tr className="border-b border-[#3F3F3F] bg-[#181818]/80">
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider w-[40%]">Video</th>
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Visibility</th>
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Metrics</th>
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Date</th>
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider text-right pr-8">Actions</th>
-                            </tr>
+                                <tr className="border-b border-[#3F3F3F] bg-[#181818]/80">
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider w-[40%]">Video</th>
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Visibility</th>
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Metrics</th>
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Date</th>
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider text-right pr-8">Actions</th>
+                                </tr>
                             </thead>
+
                             <tbody className="divide-y divide-[#3F3F3F]">
+
                             {data.videos.map((video) => (
                                 <tr key={video.id} className="hover:bg-[#272727] transition-colors group">
                                     <td className="p-5 flex items-start gap-4">
                                         <div className="w-24 h-14 bg-black rounded-md overflow-hidden shrink-0 border border-[#3F3F3F]">
                                             <img src={video.thumbnailUrl || "/placeholder.jpg"} alt="thumb" className="w-full h-full object-cover" />
                                         </div>
+
                                         <div className="flex flex-col">
                                             <a href={`/watch/${video.id}`} target="_blank" className="text-[15px] text-white font-medium line-clamp-2 hover:text-[#3ea6ff] transition-colors">
                                                 {video.title}
                                             </a>
+
                                             <span className="text-[#AAAAAA] text-xs mt-1">{video.channel.name}</span>
+
                                             {video.reportsCount > 0 && (
                                                 <span className="text-[#FF4444] text-[10px] font-bold uppercase mt-1 bg-[#FF4444]/10 w-fit px-1.5 py-0.5 rounded">
                                                         {video.reportsCount} Reports
@@ -102,6 +108,7 @@ export default function AdminContentPage() {
                                             )}
                                         </div>
                                     </td>
+
                                     <td className="p-5">
                                         <select
                                             value={video.visibility}
@@ -113,13 +120,16 @@ export default function AdminContentPage() {
                                             <option value={VideoVisibility.Private}>Private</option>
                                         </select>
                                     </td>
+
                                     <td className="p-5 text-[#AAAAAA] text-sm space-y-1">
                                         <div>{video.viewsCount.toLocaleString()} views</div>
                                         <div>{video.likesCount.toLocaleString()} likes</div>
                                     </td>
+
                                     <td className="p-5 text-[14px] text-[#888888]">
                                         {format(new Date(video.createdAt), "MMM d, yyyy")}
                                     </td>
+
                                     <td className="p-5 pr-8 text-right">
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
@@ -149,7 +159,9 @@ export default function AdminContentPage() {
                         >
                             Previous
                         </button>
+
                         <span className="px-4 py-2 text-[#AAAAAA] text-sm">Page {page}</span>
+
                         <button
                             disabled={page * data.pageSize >= data.total}
                             onClick={() => setPage(p => p + 1)}

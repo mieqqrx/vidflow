@@ -118,7 +118,6 @@ export default function Sidebar() {
                     isDrawerOpen ? "flex" : (isWatchPage ? "flex" : "hidden md:flex")
                 }`}
             >
-                {}
                 {showMiniSidebar ? (
                     <div className="flex flex-col items-center pt-2 w-[72px]">
                         {miniItems.map((item) => {
@@ -160,6 +159,7 @@ export default function Sidebar() {
 
                         <div className="px-3 py-3">
                             <h3 className="px-4 text-[15px] font-semibold text-[#AAAAAA] mb-2">Subscriptions</h3>
+
                             <div className="space-y-1">
                                 {subscriptions.map((sub: any) => {
                                     const subHref = `/channel/${sub.channelId}`;
@@ -175,6 +175,7 @@ export default function Sidebar() {
                                             >
                                                 <Avatar className="h-6 w-6 shrink-0">
                                                     <AvatarImage src={sub.channelAvatarUrl || undefined} />
+
                                                     <AvatarFallback className="bg-[#3ea6ff] text-[10px] text-white">
                                                         {sub.channelName?.[0]?.toUpperCase() || "C"}
                                                     </AvatarFallback>
@@ -193,6 +194,7 @@ export default function Sidebar() {
 
                         <div className="px-3 py-3">
                             <h3 className="px-4 text-[15px] font-semibold text-[#AAAAAA] mb-2">Explore</h3>
+
                             {moreFromYoutube.map((item) => (
                                 <SidebarItem key={item.label} {...item} isActive={pathname === item.href} />
                             ))}
@@ -210,6 +212,7 @@ export default function Sidebar() {
                             <div className="flex flex-wrap gap-2 mb-2">
                                 <a href="#">About</a><a href="#">Copyright</a><a href="#">Contact</a>
                             </div>
+
                             <p>© 2026 Google LLC</p>
                         </div>
                     </div>

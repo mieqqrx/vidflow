@@ -233,7 +233,6 @@ export default function NotificationMenu() {
 
                                     <div className="flex flex-1 gap-4 overflow-hidden">
                                         <Avatar className="h-12 w-12 shrink-0 mt-1">
-                                            {}
                                             <AvatarImage src={fixUrl(notification.actorAvatarUrl) || undefined} />
 
                                             <AvatarFallback className="bg-purple-600 text-white">

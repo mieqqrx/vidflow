@@ -30,7 +30,7 @@ namespace Youtube.Services
             {
                 new Playlist
                 {
-                    Title = "Понравившиеся",
+                    Title = "Liked",
                     IsPrivate = true,
                     IsSystem = true,
                     Type = PlaylistType.Liked,
@@ -38,7 +38,7 @@ namespace Youtube.Services
                 },
                 new Playlist
                 {
-                    Title = "Смотреть позже",
+                    Title = "Watch later",
                     IsPrivate = true,
                     IsSystem = true,
                     Type = PlaylistType.WatchLater,

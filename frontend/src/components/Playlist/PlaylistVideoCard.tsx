@@ -31,6 +31,7 @@ export default function PlaylistVideoCard({
 
     const handleRemove = async (e: React.MouseEvent) => {
         e.preventDefault();
+
         try {
             await removeVideo({ playlistId, playlistVideoId }).unwrap();
             toast.success("Removed from playlist");
@@ -88,6 +89,7 @@ export default function PlaylistVideoCard({
                         <div className="text-[#aaaaaa] text-[14px] hover:text-white transition-colors truncate w-fit">
                             {channelName}
                         </div>
+
                         {views && timeAgo && (
                             <div className="text-[#aaaaaa] text-[13px] mt-0.5">
                                 {views} views • {timeAgo}

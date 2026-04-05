@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { useGetAdminReportsQuery, useReviewReportMutation } from "@/store/api";
 import { ReportStatus } from "@/types";
 
-// Добавляем словарь для перевода цифр (Enum) в красивый текст
 const REPORT_REASONS_MAP: Record<number, string> = {
     0: "Sexual content",
     1: "Violent or repulsive content",
@@ -108,13 +107,13 @@ export default function AdminReportsPage() {
                     ) : reports && reports.length > 0 ? (
                         <table className="w-full text-left border-collapse min-w-[1100px]">
                             <thead>
-                            <tr className="border-b border-[#3F3F3F] bg-[#181818]/80">
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider w-[25%]">Video</th>
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider w-[35%]">Report Details</th>
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Reporter</th>
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Status</th>
-                                <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider text-right pr-8">Actions</th>
-                            </tr>
+                                <tr className="border-b border-[#3F3F3F] bg-[#181818]/80">
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider w-[25%]">Video</th>
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider w-[35%]">Report Details</th>
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Reporter</th>
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider">Status</th>
+                                    <th className="p-5 text-xs font-bold text-[#AAAAAA] uppercase tracking-wider text-right pr-8">Actions</th>
+                                </tr>
                             </thead>
 
                             <tbody className="divide-y divide-[#3F3F3F]">
@@ -131,21 +130,25 @@ export default function AdminReportsPage() {
                                             <ExternalLink className="w-3 h-3 shrink-0" />
                                         </a>
                                     </td>
+
                                     <td className="p-5">
                                         <div className="flex flex-col gap-1.5">
-                                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-bold text-[#FF4444] bg-[#FF4444]/10 border border-[#FF4444]/20 w-fit capitalize">
-                                                    <AlertTriangle className="w-3 h-3 mr-1.5" />
-                                                    {/* ИСПОЛЬЗУЕМ СЛОВАРЬ ЗДЕСЬ */}
-                                                    {REPORT_REASONS_MAP[Number(report.reason)] || "Unknown Reason"}
-                                                </span>
+                                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[12px] font-bold text-[#FF4444] bg-[#FF4444]/10 border border-[#FF4444]/20 w-fit capitalize">
+                                                <AlertTriangle className="w-3 h-3 mr-1.5" />
+                                                {/* ИСПОЛЬЗУЕМ СЛОВАРЬ ЗДЕСЬ */}
+                                                {REPORT_REASONS_MAP[Number(report.reason)] || "Unknown Reason"}
+                                            </span>
+
                                             {report.details && (
                                                 <p className="text-[#AAAAAA] text-[13px] bg-[#181818] p-2.5 rounded-lg border border-[#3F3F3F] mt-1 line-clamp-3">
                                                     "{report.details}"
                                                 </p>
                                             )}
+
                                             {report.moderatorNote && (
                                                 <div className="mt-2 flex items-start gap-2 text-[13px] text-[#3ea6ff] bg-[#3ea6ff]/10 p-2.5 rounded-lg border border-[#3ea6ff]/20">
                                                     <MessageSquare className="w-4 h-4 shrink-0 mt-0.5" />
+
                                                     <div>
                                                         <span className="font-bold block mb-0.5">Moderator Note:</span>
                                                         {report.moderatorNote}
@@ -158,25 +161,29 @@ export default function AdminReportsPage() {
                                     <td className="p-5">
                                         <div className="flex flex-col">
                                             <span className="text-[14px] font-medium text-white">@{report.reporter.username}</span>
+
                                             <span className="text-[#888888] text-[12px] mt-1">
                                                 {formatDistanceToNow(new Date(report.createdAt), { addSuffix: true })}
                                             </span>
                                         </div>
                                     </td>
+
                                     <td className="p-5">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${
-                                                report.status === ReportStatus.Pending ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20" :
-                                                    report.status === ReportStatus.Resolved ? "bg-green-500/10 text-green-500 border border-green-500/20" :
-                                                        "bg-red-500/10 text-[#FF4444] border border-red-500/20"
-                                            }`}>
-                                                {ReportStatus[report.status]}
-                                            </span>
+                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold ${
+                                            report.status === ReportStatus.Pending ? "bg-yellow-500/10 text-yellow-500 border border-yellow-500/20" :
+                                                report.status === ReportStatus.Resolved ? "bg-green-500/10 text-green-500 border border-green-500/20" :
+                                                    "bg-red-500/10 text-[#FF4444] border border-red-500/20"
+                                        }`}>
+                                            {ReportStatus[report.status]}
+                                        </span>
+
                                         {report.reviewedAt && (
                                             <div className="text-[11px] text-[#888888] mt-2">
                                                 Reviewed: {format(new Date(report.reviewedAt), "MMM d, yyyy")}
                                             </div>
                                         )}
                                     </td>
+
                                     <td className="p-5 pr-8 text-right">
                                         {report.status === ReportStatus.Pending && (
                                             <div className="flex items-center justify-end gap-2">

@@ -187,6 +187,7 @@ export default function AdminSettingsPage() {
                                 <label className="flex items-start gap-4 p-4 rounded-xl border border-[#3F3F3F] bg-[#181818] cursor-pointer hover:border-[#3ea6ff]/50 transition-colors">
                                     <div className="relative flex items-center justify-center mt-0.5">
                                         <input type="checkbox" name="notifyOnReports" checked={settings.notifyOnReports} onChange={handleChange} className="sr-only" />
+
                                         <div className={`w-10 h-6 rounded-full transition-colors ${settings.notifyOnReports ? 'bg-[#3ea6ff]' : 'bg-[#3F3F3F]'}`}>
                                             <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${settings.notifyOnReports ? 'translate-x-5' : 'translate-x-1'}`} />
                                         </div>
@@ -209,6 +210,7 @@ export default function AdminSettingsPage() {
                                 <label className="flex items-start gap-4 p-4 rounded-xl border border-yellow-500/30 bg-yellow-500/5 cursor-pointer hover:border-yellow-500/50 transition-colors">
                                     <div className="relative flex items-center justify-center mt-0.5">
                                         <input type="checkbox" name="maintenanceMode" checked={settings.maintenanceMode} onChange={handleChange} className="sr-only" />
+
                                         <div className={`w-10 h-6 rounded-full transition-colors ${settings.maintenanceMode ? 'bg-yellow-500' : 'bg-[#3F3F3F]'}`}>
                                             <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${settings.maintenanceMode ? 'translate-x-5' : 'translate-x-1'}`} />
                                         </div>
@@ -236,7 +238,6 @@ export default function AdminSettingsPage() {
                             </div>
                         </div>
                     )}
-
                 </div>
             </div>
         </div>

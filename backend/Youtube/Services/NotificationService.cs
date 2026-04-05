@@ -22,8 +22,8 @@ namespace Youtube.Services
 
             var notificationType = video.IsShort ? NotificationType.NewShort : NotificationType.NewVideo;
             var message = video.IsShort
-                ? $"{channel.Name} опубликовал новый шортс: {video.Title}"
-                : $"{channel.Name} опубликовал новое видео: {video.Title}";
+                ? $"{channel.Name} posted a new short: {video.Title}"
+                : $"{channel.Name} posted a new video: {video.Title}";
 
             var notifications = subscribers
                 .Where(s => s.User.NotifyOnNewVideo)
@@ -54,7 +54,7 @@ namespace Youtube.Services
                 UserId = channelOwnerId,
                 Type = NotificationType.VideoReady,
                 VideoId = video.Id,
-                Message = $"Ваше видео \"{video.Title}\" готово к просмотру",
+                Message = $"Your video \"{video.Title}\" is ready to watch",
                 ThumbnailUrl = video.ThumbnailUrl,
                 ActorName = "YouTube"
             });
@@ -77,7 +77,7 @@ namespace Youtube.Services
                 Type = NotificationType.CommentReply,
                 VideoId = reply.VideoId,
                 CommentId = reply.Id,
-                Message = $"{replyAuthor?.Username} ответил на ваш комментарий",
+                Message = $"{replyAuthor?.Username} replied to your comment",
                 ActorName = replyAuthor?.Username,
                 ActorAvatarUrl = replyAuthor?.AvatarUrl
             });
@@ -107,7 +107,7 @@ namespace Youtube.Services
                     Type = NotificationType.CommentMention,
                     VideoId = comment.VideoId,
                     CommentId = comment.Id,
-                    Message = $"{commentAuthor?.Username} упомянул вас в комментарии",
+                    Message = $"{commentAuthor?.Username} mentioned you in a comment",
                     ActorName = commentAuthor?.Username,
                     ActorAvatarUrl = commentAuthor?.AvatarUrl
                 });
@@ -218,7 +218,7 @@ namespace Youtube.Services
             {
                 UserId = userId,
                 Type = NotificationType.LiveStreamStarted,
-                Message = $"{channel.Name} начал прямую трансляцию: {stream.Title}",
+                Message = $"{channel.Name} began the live broadcast: {stream.Title}",
                 ChannelId = channel.Id,
                 ActorName = channel.Name,
                 ActorAvatarUrl = channel.Owner?.AvatarUrl

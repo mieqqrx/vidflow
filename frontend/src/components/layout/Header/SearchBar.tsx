@@ -13,7 +13,6 @@ export default function SearchBar() {
     const router = useRouter();
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    // Дебаунс: ждем 300мс после последнего нажатия клавиши, прежде чем менять debouncedQuery
     useEffect(() => {
         const timer = setTimeout(() => {
             setDebouncedQuery(query);
@@ -21,7 +20,6 @@ export default function SearchBar() {
         return () => clearTimeout(timer);
     }, [query]);
 
-    // Запрашиваем подсказки, только если длина запроса >= 2
     const { data: suggestions, isFetching } = useGetSearchSuggestionsQuery(debouncedQuery, {
         skip: debouncedQuery.length < 2,
     });
@@ -35,7 +33,6 @@ export default function SearchBar() {
         }
     };
 
-    // Закрываем выпадашку при клике вне нее
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -76,7 +73,6 @@ export default function SearchBar() {
                 </button>
             </form>
 
-            {/* Выпадающий список подсказок */}
             {isFocused && query.length >= 2 && suggestions && suggestions.length > 0 && (
                 <div className="absolute top-12 left-0 right-16 bg-[#212121] rounded-xl border border-[#3F3F3F] shadow-2xl py-3 z-50 flex flex-col">
                     {suggestions.map((suggestion, idx) => (

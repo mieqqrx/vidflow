@@ -337,6 +337,7 @@ export default function LiveStreamPlayer({ stream, viewersCount }: LiveStreamPla
                                 <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
                                 LIVE
                             </div>
+
                             <div className="bg-black/60 backdrop-blur-sm text-white text-[12px] font-bold px-2 py-1 rounded flex items-center gap-1.5 shadow-lg">
                                 <Users className="w-3.5 h-3.5" />
                                 {viewersCount.toLocaleString()}
@@ -358,6 +359,7 @@ export default function LiveStreamPlayer({ stream, viewersCount }: LiveStreamPla
                             <div ref={progressBarRef} className="w-full h-[5px] bg-white/30 cursor-pointer relative group/progress rounded-full" onMouseDown={handleProgressMouseDown}>
                                 <div className="absolute inset-y-0 left-0 right-0 bg-transparent group-hover/progress:h-[5px] transition-all z-0"></div>
                                 <div className="absolute top-1/2 -translate-y-1/2 left-0 h-[5px] group-hover/progress:h-[6px] bg-[#AAAAAA]/60 z-10 transition-all rounded-l-full" style={{ width: `${buffered}%` }}></div>
+
                                 <div ref={progressFillRef} className={`absolute top-1/2 -translate-y-1/2 left-0 h-[5px] group-hover/progress:h-[6px] bg-[#3ea6ff] z-20 rounded-l-full ${isDraggingProgress ? 'transition-none' : 'transition-all duration-200 ease-out'}`} style={{ width: '0%' }}>
                                     <div className={`absolute right-[-6px] top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-[#3ea6ff] rounded-full transition-transform shadow-sm ${isDraggingProgress ? 'scale-125' : 'scale-0 group-hover/progress:scale-100'}`} />
                                 </div>
@@ -378,6 +380,7 @@ export default function LiveStreamPlayer({ stream, viewersCount }: LiveStreamPla
                                     <button onClick={toggleMute} className="hover:text-[#3ea6ff] transition-colors cursor-pointer">
                                         {isMuted || volume === 0 ? <VolumeX className="w-6 h-6 drop-shadow" /> : <Volume2 className="w-6 h-6 drop-shadow" />}
                                     </button>
+
                                     <div className={`overflow-hidden transition-all duration-300 flex items-center ${isDraggingVolume ? "w-16" : "w-0 group-hover/vol:w-16"}`}>
                                         <div ref={volumeBarRef} className="h-[20px] w-14 ml-2 relative cursor-pointer flex items-center group/volbar" onMouseDown={handleVolumeMouseDown}>
                                             <div className="h-[3px] w-full bg-white/50 rounded-full relative pointer-events-none">
@@ -412,12 +415,14 @@ export default function LiveStreamPlayer({ stream, viewersCount }: LiveStreamPla
                                         {isSettingsOpen && (
                                             <div className="absolute bottom-10 right-[-20px] bg-[#282828]/95 backdrop-blur-md rounded-lg shadow-xl py-2 min-w-[140px] border border-[#3F3F3F] z-50">
                                                 <div className="px-4 py-1.5 text-[11px] text-[#AAAAAA] uppercase font-bold border-b border-[#3F3F3F] mb-1">Quality</div>
+
                                                 <button onClick={() => handleQualityChange(-1)} className="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#3F3F3F] transition-colors flex items-center gap-2 cursor-pointer">
                                                     <div className="w-4 flex justify-center">{currentLevel === -1 && <Check className="w-4 h-4 text-[#3ea6ff]" />}</div>
                                                     <span className={currentLevel === -1 ? "text-white font-medium" : "text-[#AAAAAA]"}>Auto</span>
                                                 </button>
                                                 {[...levels].reverse().map((level, reversedIndex) => {
                                                     const originalIndex = levels.length - 1 - reversedIndex;
+
                                                     return (
                                                         <button key={originalIndex} onClick={() => handleQualityChange(originalIndex)} className="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#3F3F3F] transition-colors flex items-center gap-2 cursor-pointer">
                                                             <div className="w-4 flex justify-center">{currentLevel === originalIndex && <Check className="w-4 h-4 text-[#3ea6ff]" />}</div>

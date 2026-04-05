@@ -99,7 +99,6 @@ export default function CreateChannelPage() {
                 </div>
 
                 <div className="space-y-6">
-                    {}
                     <div className="space-y-1 relative group">
                         <Input
                             value={name}
@@ -108,6 +107,7 @@ export default function CreateChannelPage() {
                             placeholder=" "
                             id="channelName"
                         />
+
                         <label
                             htmlFor="channelName"
                             className={`absolute left-3 transition-all duration-200 pointer-events-none ${
@@ -120,7 +120,6 @@ export default function CreateChannelPage() {
                         </label>
                     </div>
 
-                    {}
                     <div className="space-y-1 relative group">
                         <Input
                             value={handle}
@@ -129,6 +128,7 @@ export default function CreateChannelPage() {
                             placeholder=" "
                             id="channelHandle"
                         />
+
                         <label
                             htmlFor="channelHandle"
                             className={`absolute left-3 transition-all duration-200 pointer-events-none ${
@@ -139,6 +139,7 @@ export default function CreateChannelPage() {
                         >
                             Handle
                         </label>
+
                         {handle && (
                             <span className="absolute right-3 top-4 text-[12px] text-[#AAAAAA]">
                                 @{handle.toLowerCase().replace(/\s+/g, '')}

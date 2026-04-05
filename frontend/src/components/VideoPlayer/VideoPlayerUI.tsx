@@ -7,7 +7,6 @@ import {
     Subtitles, RectangleHorizontal, Check, Loader2
 } from "lucide-react";
 
-// Подключаем наш хук управления громкостью
 import { useVolumeControl } from "@/hooks/useVolumeControl";
 
 export interface VideoPlayerUIProps {
@@ -33,8 +32,8 @@ const formatTime = (time: number, totalDuration?: number) => {
 };
 
 export default function VideoPlayerUI({
-                                          videoUrl, thumbnail, onEnded, autoplayEnabled = true, onToggleAutoplay, initialTime, onSavePosition
-                                      }: VideoPlayerUIProps) {
+  videoUrl, thumbnail, onEnded, autoplayEnabled = true, onToggleAutoplay, initialTime, onSavePosition
+}: VideoPlayerUIProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [buffered, setBuffered] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -61,7 +60,6 @@ export default function VideoPlayerUI({
     const hlsRef = useRef<Hls | null>(null);
     const savePositionRef = useRef(onSavePosition);
 
-    // Инициализируем управление громкостью через хук
     const { volume, isMuted, changeVolume, toggleMute } = useVolumeControl(videoRef);
 
     useEffect(() => {
@@ -153,7 +151,6 @@ export default function VideoPlayerUI({
             const rect = volumeBarRef.current.getBoundingClientRect();
             const clickPosition = Math.max(0, Math.min(clientX - rect.left, rect.width));
             const percentage = clickPosition / rect.width;
-            // Передаем значение в хук вместо локального стейта
             changeVolume(percentage);
         }
     };
@@ -515,6 +512,7 @@ export default function VideoPlayerUI({
                                         <div className="w-4 flex justify-center">
                                             {currentLevel === -1 && <Check className="w-4 h-4 text-[#3ea6ff]" />}
                                         </div>
+
                                         <span className={currentLevel === -1 ? "text-white font-medium" : "text-[#AAAAAA]"}>
                                             Auto
                                         </span>
@@ -532,6 +530,7 @@ export default function VideoPlayerUI({
                                                 <div className="w-4 flex justify-center">
                                                     {currentLevel === originalIndex && <Check className="w-4 h-4 text-[#3ea6ff]" />}
                                                 </div>
+
                                                 <span className={currentLevel === originalIndex ? "text-white font-medium" : "text-[#AAAAAA]"}>
                                                     {level.height}p
                                                 </span>

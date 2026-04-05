@@ -93,6 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                     {SYSTEM_LINKS.map((link) => {
                         const Icon = link.icon;
+
                         return (
                             <Link key={link.name} href={link.href}>
                                 <div className="flex items-center gap-4 px-3 py-2.5 rounded-xl cursor-pointer transition-colors text-[#AAAAAA] hover:bg-[#272727] hover:text-white">
