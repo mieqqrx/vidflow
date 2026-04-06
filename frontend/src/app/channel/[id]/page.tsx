@@ -98,6 +98,7 @@ export default function ChannelPage() {
                                 <div className="mt-8 border-t border-[#3F3F3F] pt-6">
                                     <div className="flex items-center gap-2 mb-4 text-white">
                                         <span className="font-medium text-[16px]">Uploads</span>
+
                                         <div className="flex items-center gap-1 text-[#AAAAAA] text-xs font-bold uppercase tracking-wide cursor-pointer hover:text-white transition-colors ml-2">
                                             <Play className="h-3 w-3 fill-current" />
                                             <span>Play All</span>
@@ -228,9 +229,11 @@ function EmptyChannelState({ isOwner, setIsUploadOpen, type }: { isOwner: boolea
             <div className="flex flex-col items-center justify-center pt-20 text-center">
                 <div className="mt-10 flex flex-col items-center">
                     <Radio className="w-16 h-16 text-[#3F3F3F] mb-4" />
+
                     <h2 className="text-xl font-medium text-white mb-2">
                         {isOwner ? "You haven't streamed yet." : "This channel has no live streams."}
                     </h2>
+
                     {isOwner && (
                         <Link href="/studio">
                             <Button className="mt-4 bg-[#3ea6ff] hover:bg-[#6ebcff] text-black rounded-full px-6 h-10 font-medium transition-all cursor-pointer">

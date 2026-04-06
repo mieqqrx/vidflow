@@ -30,6 +30,7 @@ export default function SubscriptionsPage() {
                 <div className="mb-8 pb-6 border-b border-[#3F3F3F]/50">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-xl font-bold text-white">Latest from subscriptions</h2>
+
                         <Link href="/channels" className="text-sm font-medium text-[#3ea6ff] hover:text-[#6ebcff] transition-colors">
                             Manage
                         </Link>
@@ -58,6 +59,7 @@ export default function SubscriptionsPage() {
                                         <div className="absolute bottom-0 right-0 md:bottom-1 md:right-1 w-3.5 h-3.5 bg-[#3ea6ff] border-2 border-[#0F0F0F] rounded-full"></div>
                                     )}
                                 </div>
+
                                 <span className="text-[13px] text-[#AAAAAA] group-hover:text-white text-center w-full truncate px-1 transition-colors">
                                     {sub.channelName || sub.name}
                                 </span>
@@ -90,9 +92,11 @@ export default function SubscriptionsPage() {
                     <div className="flex flex-col items-center justify-center py-20 text-[#AAAAAA]">
                         <div className="text-6xl mb-4">📭</div>
                         <h2 className="text-xl font-bold text-white mb-2">No new videos</h2>
+
                         <p className="text-sm text-center max-w-md">
                             The channels you are subscribed to haven't uploaded any new videos recently.
                         </p>
+
                         <Link href="/explore">
                             <button className="mt-6 px-6 py-2 bg-[#272727] hover:bg-[#3F3F3F] text-white font-medium rounded-full transition-colors">
                                 Explore channels

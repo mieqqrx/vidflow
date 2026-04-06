@@ -60,6 +60,7 @@ export default function Header() {
                     <div className="relative h-7 w-7">
                         <Image src="/vidflow_logo.png" alt="VidFlow Logo" width={28} height={28} className="object-contain" />
                     </div>
+
                     <span className="text-xl font-bold tracking-tighter text-[#EEEEEE] font-sans relative bottom-[1px]">VidFlow</span>
                 </Link>
             </div>

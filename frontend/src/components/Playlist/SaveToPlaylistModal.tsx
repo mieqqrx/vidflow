@@ -133,7 +133,6 @@ export default function SaveToPlaylistModal({ isOpen, onClose, videoId }: SaveTo
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             <DialogContent className="bg-[#212121] border-none text-white sm:max-w-[320px] p-0 gap-0 overflow-hidden rounded-xl shadow-2xl [&>button]:text-[#aaaaaa] [&>button]:hover:text-white [&>button]:right-4 [&>button]:top-4 [&>button]:focus:ring-0 [&>button]:focus:outline-none">
-
                 <DialogHeader className="p-4 pb-3 border-b border-[#3f3f3f]/50 text-left">
                     <DialogTitle className="text-[16px] font-medium tracking-wide">Save to...</DialogTitle>
                 </DialogHeader>
@@ -214,7 +213,6 @@ export default function SaveToPlaylistModal({ isOpen, onClose, videoId }: SaveTo
                             <div className="flex flex-col gap-1 relative z-50">
                                 <label className="text-[12px] font-medium text-[#aaaaaa]">Privacy</label>
 
-                                {/* Кастомный селект */}
                                 <div className="relative">
                                     <button
                                         type="button"
@@ -228,7 +226,6 @@ export default function SaveToPlaylistModal({ isOpen, onClose, videoId }: SaveTo
                                         <ChevronDown className={`w-4 h-4 text-[#aaaaaa] transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
                                     </button>
 
-                                    {/* Выпадающее меню */}
                                     {isDropdownOpen && (
                                         <>
                                             <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
@@ -240,6 +237,7 @@ export default function SaveToPlaylistModal({ isOpen, onClose, videoId }: SaveTo
                                                     <Globe className="w-4 h-4 text-[#aaaaaa]" />
                                                     <span className="text-[14px]">Public</span>
                                                 </div>
+
                                                 <div
                                                     onClick={() => { setIsPrivate(true); setIsDropdownOpen(false); }}
                                                     className={`flex items-center gap-2 px-3 py-2 cursor-pointer transition-colors ${isPrivate ? 'bg-[#3f3f3f]' : 'hover:bg-[#3f3f3f]/60'}`}

@@ -63,9 +63,9 @@ export default function ReportVideoModal({ isOpen, onClose, videoId }: ReportVid
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <div className="bg-[#212121] rounded-xl w-full max-w-[500px] shadow-2xl border border-[#3F3F3F] flex flex-col overflow-hidden">
-
                 <div className="flex items-center justify-between p-6 border-b border-[#3F3F3F]">
                     <h2 className="text-xl font-bold text-white">Report video</h2>
+
                     <button onClick={handleClose} className="p-2 hover:bg-[#3F3F3F] rounded-full transition-colors text-white cursor-pointer">
                         <X className="w-5 h-5" />
                     </button>
@@ -78,6 +78,7 @@ export default function ReportVideoModal({ isOpen, onClose, videoId }: ReportVid
                                 <AlertTriangle className="w-5 h-5 text-[#FF0000]" />
                                 What is the issue?
                             </h3>
+
                             <div className="space-y-3">
                                 {REPORT_REASONS.map((item) => (
                                     <label key={item.value} className="flex items-center gap-3 cursor-pointer group">
@@ -86,6 +87,7 @@ export default function ReportVideoModal({ isOpen, onClose, videoId }: ReportVid
                                                 <div className="w-2.5 h-2.5 bg-white rounded-full" />
                                             )}
                                         </div>
+
                                         <input
                                             type="radio"
                                             name="report_reason"
@@ -94,6 +96,7 @@ export default function ReportVideoModal({ isOpen, onClose, videoId }: ReportVid
                                             onChange={() => setSelectedReason(item.value)}
                                             className="hidden"
                                         />
+
                                         <span className={`text-[15px] transition-colors ${selectedReason === item.value ? "text-white" : "text-[#AAAAAA] group-hover:text-white"}`}>
                                             {item.label}
                                         </span>
@@ -104,9 +107,11 @@ export default function ReportVideoModal({ isOpen, onClose, videoId }: ReportVid
                     ) : (
                         <>
                             <h3 className="text-white font-medium mb-2">Provide additional details</h3>
+
                             <p className="text-[#AAAAAA] text-sm mb-4">
                                 This helps us understand the issue better. Do not include sensitive personal information.
                             </p>
+
                             <textarea
                                 value={details}
                                 onChange={(e) => setDetails(e.target.value)}
@@ -121,6 +126,7 @@ export default function ReportVideoModal({ isOpen, onClose, videoId }: ReportVid
                     <Button variant="ghost" onClick={handleClose} className="hover:bg-[#3F3F3F] text-white rounded-full cursor-pointer">
                         Cancel
                     </Button>
+
                     {step === 1 ? (
                         <Button
                             onClick={() => setStep(2)}

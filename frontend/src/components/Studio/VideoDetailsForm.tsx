@@ -30,7 +30,7 @@ export interface VideoDetailsUpdatePayload {
     description?: string;
     visibility: number;
     customThumbnail?: File;
-    tags?: string[]; // <-- Добавили поле для тегов
+    tags?: string[];
 }
 
 interface VideoDetailsFormProps {
@@ -53,7 +53,6 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
     const [visibility, setVisibility] = useState<number>(video.visibility ?? 0);
     const [isVisibilityOpen, setIsVisibilityOpen] = useState(false);
 
-    // === СТЕЙТЫ ДЛЯ ТЕГОВ ===
     const [tags, setTags] = useState<string[]>(video.tags || []);
     const [tagInput, setTagInput] = useState("");
 
@@ -87,20 +86,16 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
         }
     };
 
-    // === ОБРАБОТЧИКИ ТЕГОВ ===
     const handleTagKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-        // Добавляем тег по нажатию Enter или запятой
         if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault(); // Важно: предотвращаем сабмит всей формы по Enter
-            const newTag = tagInput.trim().replace(/^#/, ''); // Убираем пробелы и хэштег, если юзер его написал
+            e.preventDefault();
+            const newTag = tagInput.trim().replace(/^#/, '');
 
             if (newTag && !tags.includes(newTag)) {
                 setTags([...tags, newTag]);
             }
             setTagInput("");
-        }
-        // Удаляем последний тег по Backspace, если инпут пустой
-        else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
+        } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
             setTags(tags.slice(0, -1));
         }
     };
@@ -115,7 +110,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
             description: data.description,
             visibility: visibility,
             customThumbnail: selectedFile || undefined,
-            tags: tags, // <-- Передаем теги в родительский компонент
+            tags: tags,
         });
     };
 
@@ -133,8 +128,6 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
     return (
         <form id="video-details-form" onSubmit={handleSubmit(onSubmit)} className="flex flex-col xl:flex-row gap-8 w-full">
             <div className="flex-1 flex flex-col gap-8 w-full">
-
-                {/* --- TITLE --- */}
                 <div>
                     <div className={`relative border rounded-lg p-3 pt-5 transition-all duration-200 bg-[#0f0f0f] group focus-within:bg-[#121212] ${
                         errors.title ? 'border-red-500' : 'border-[#333] focus-within:border-[#3ea6ff] hover:border-[#555]'
@@ -157,11 +150,11 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                             {errors.title && <AlertCircle className="w-3.5 h-3.5" />}
                             {errors.title?.message}
                         </span>
+
                         <span className="text-[12px] text-[#aaaaaa] ml-auto font-mono">{titleValue.length}/100</span>
                     </div>
                 </div>
 
-                {/* --- DESCRIPTION --- */}
                 <div>
                     <div className={`relative border rounded-lg p-3 pt-5 transition-all duration-200 bg-[#0f0f0f] group focus-within:bg-[#121212] ${
                         errors.description ? 'border-red-500' : 'border-[#333] focus-within:border-[#3ea6ff] hover:border-[#555]'
@@ -184,15 +177,16 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                             {errors.description && <AlertCircle className="w-3.5 h-3.5" />}
                             {errors.description?.message}
                         </span>
+
                         <span className="text-[12px] text-[#aaaaaa] ml-auto font-mono">{descriptionValue.length}/5000</span>
                     </div>
                 </div>
 
-                {/* --- TAGS (НОВЫЙ БЛОК) --- */}
                 <div className="mt-2">
                     <h3 className="text-[16px] font-semibold text-white mb-1.5 flex items-center gap-2">
                         Tags
                     </h3>
+
                     <p className="text-[13px] text-[#aaaaaa] mb-4 max-w-2xl leading-relaxed">
                         Tags can be useful if content in your video is commonly misspelled. Otherwise, tags play a minimal role in helping viewers find your video.
                     </p>
@@ -201,6 +195,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                         {tags.map((tag, index) => (
                             <div key={index} className="flex items-center gap-1 bg-[#272727] text-[#aaaaaa] border border-[#3f3f3f] px-2.5 py-1 rounded-sm text-[13px]">
                                 <span>{tag}</span>
+
                                 <button
                                     type="button"
                                     onClick={() => removeTag(index)}
@@ -222,7 +217,6 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                     </div>
                 </div>
 
-                {/* --- THUMBNAIL --- */}
                 <div className="mt-2 border-t border-[#3F3F3F] pt-8">
                     <h3 className="text-[16px] font-semibold text-white mb-1.5 flex items-center gap-2">
                         <PlaySquare className="w-5 h-5 text-[#aaaaaa]" />
@@ -245,6 +239,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                             {customThumbnailUrl ? (
                                 <>
                                     <img src={customThumbnailUrl} alt="Custom" className="w-full h-full object-cover" />
+
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-[2px]">
                                         <ImagePlus className="w-6 h-6 text-white transform group-hover:scale-110 transition-transform" />
                                     </div>
@@ -254,6 +249,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                                     <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center mb-2 group-hover:bg-[#333] transition-colors">
                                         <ImagePlus className="w-4 h-4 text-[#aaaaaa] group-hover:text-white transition-colors" />
                                     </div>
+
                                     <span className="text-[12px] font-medium text-[#aaaaaa] group-hover:text-white transition-colors">Upload file</span>
                                 </div>
                             )}
@@ -262,6 +258,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                         {!customThumbnailUrl && video.thumbnailUrl && (
                             <div className="relative w-[160px] h-[90px] rounded-lg overflow-hidden border-2 border-[#3ea6ff] shadow-[0_0_15px_rgba(62,166,255,0.15)] group">
                                 <img src={video.thumbnailUrl} alt="Current" className="w-full h-full object-cover" />
+
                                 <div className="absolute top-1.5 left-1.5 bg-black/80 backdrop-blur-sm px-2 py-0.5 rounded flex items-center gap-1.5">
                                     <div className="w-1.5 h-1.5 bg-[#3ea6ff] rounded-full animate-pulse" />
                                     <span className="text-[10px] font-medium text-white uppercase tracking-wider">Current</span>
@@ -272,10 +269,8 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                 </div>
             </div>
 
-            {/* --- ПРАВАЯ КОЛОНКА (ПРЕВЬЮ И ПРИВАТНОСТЬ) --- */}
             <div className="w-full xl:w-[380px] shrink-0">
                 <div className="sticky top-28 flex flex-col gap-6">
-                    {/* Video Preview Card */}
                     <div className="bg-[#0f0f0f] rounded-xl overflow-hidden border border-[#2e2e2e] shadow-xl">
                         <div className="w-full aspect-video bg-[#050505] relative group border-b border-[#2e2e2e]">
                             <img
@@ -323,7 +318,6 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                         </div>
                     </div>
 
-                    {/* Visibility Dropdown */}
                     <div className="bg-[#0f0f0f] rounded-xl border border-[#2e2e2e] shadow-xl p-5">
                         <p className="text-[14px] font-medium text-white mb-4">Visibility</p>
 
@@ -335,11 +329,13 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                             >
                                 <div className="flex items-center gap-3">
                                     <selectedVisibilityOption.icon className="w-5 h-5 text-[#aaaaaa]" />
+
                                     <div className="flex flex-col items-start">
                                         <span className="text-[14px] text-white leading-none mb-1">{selectedVisibilityOption.label}</span>
                                         <span className="text-[12px] text-[#aaaaaa] leading-none text-left">{selectedVisibilityOption.desc}</span>
                                     </div>
                                 </div>
+
                                 <ChevronDown className={`w-4 h-4 text-[#aaaaaa] transition-transform duration-200 ${isVisibilityOpen ? 'rotate-180' : ''}`} />
                             </button>
 
@@ -360,6 +356,7 @@ export default function VideoDetailsForm({ video, onSave, isSaving }: VideoDetai
                                                     className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors ${isActive ? 'bg-[#3f3f3f]/80' : 'hover:bg-[#3f3f3f]/50'}`}
                                                 >
                                                     <opt.icon className={`w-5 h-5 mt-0.5 ${isActive ? 'text-white' : 'text-[#aaaaaa]'}`} />
+
                                                     <div className="flex flex-col">
                                                         <span className={`text-[14px] font-medium mb-1 ${isActive ? 'text-white' : 'text-[#f1f1f1]'}`}>
                                                             {opt.label}

@@ -17,7 +17,6 @@ export default function ShortsPage() {
     const [activeShortId, setActiveShortId] = useState<string | null>(initialShortId);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // 1. Инициализация первого шортса
     useEffect(() => {
         if (page === 1 && shorts && shorts.length > 0 && !activeShortId) {
             setActiveShortId(shorts[0].id);
@@ -25,7 +24,6 @@ export default function ShortsPage() {
         }
     }, [shorts, activeShortId, page]);
 
-    // 2. Скролл к начальному шортсу (Deep Linking)
     useEffect(() => {
         if (initialShortId && shorts && containerRef.current) {
             const targetElement = containerRef.current.querySelector(`[data-short-id="${initialShortId}"]`);
@@ -35,7 +33,6 @@ export default function ShortsPage() {
         }
     }, [initialShortId, shorts]);
 
-    // 3. Отслеживание скролла через IntersectionObserver
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
@@ -67,7 +64,6 @@ export default function ShortsPage() {
         };
     }, [shorts, activeShortId]);
 
-    // 4. Бесконечная подгрузка ленты
     const lastElementObserver = useRef<IntersectionObserver | null>(null);
     const lastShortElementRef = useCallback((node: HTMLDivElement) => {
         if (isFetching) return;
@@ -82,7 +78,6 @@ export default function ShortsPage() {
         if (node) lastElementObserver.current.observe(node);
     }, [isFetching, shorts, page]);
 
-    // === ЛОГИКА ПЕРЕЛИСТЫВАНИЯ ===
     const scrollToIndex = useCallback((index: number) => {
         if (!shorts || index < 0 || index >= shorts.length) return;
 
@@ -148,7 +143,6 @@ export default function ShortsPage() {
 
     return (
         <div className="bg-[#0f0f0f] h-[calc(100vh-72px)] w-full overflow-hidden flex justify-center relative">
-
             <div
                 ref={containerRef}
                 className="w-full max-w-[600px] h-full overflow-y-auto snap-y snap-mandatory no-scrollbar relative z-10"

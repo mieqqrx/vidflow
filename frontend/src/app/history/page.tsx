@@ -83,6 +83,7 @@ export default function HistoryPage() {
                             <div className="w-24 h-24 bg-[#212121] rounded-full flex items-center justify-center mb-4">
                                 <Trash2 className="w-10 h-10 text-[#aaaaaa]" />
                             </div>
+
                             <h2 className="text-xl font-medium text-white mb-2">This list has no videos.</h2>
                             <p className="text-[#aaaaaa]">Videos you watch will show up here.</p>
                         </div>
@@ -91,6 +92,7 @@ export default function HistoryPage() {
                             {Object.entries(groupedHistory).map(([dateKey, items]) => (
                                 <div key={dateKey}>
                                     <h3 className="text-[16px] font-medium text-white mb-4">{dateKey}</h3>
+
                                     <div className="flex flex-col gap-2">
                                         {items.map((item) => (
                                             <HistoryVideoCard
@@ -110,6 +112,7 @@ export default function HistoryPage() {
                     <div className="flex flex-col gap-4 lg:sticky lg:top-[90px]">
                         <div className="relative mb-2">
                             <Search className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-5 text-[#aaaaaa]" />
+
                             <input
                                 type="text"
                                 placeholder="Search watch history"

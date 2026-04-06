@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export default function LiveStreamInfo({
-                                           stream,
-                                           isOwner,
-                                           isSubscribed,
-                                           isTogglingSub,
-                                           handleSubscribeClick
-                                       }: any) {
+   stream,
+   isOwner,
+   isSubscribed,
+   isTogglingSub,
+   handleSubscribeClick
+}: any) {
     const handleShare = () => {
         navigator.clipboard.writeText(window.location.href);
         toast.success("Link copied to clipboard!");
@@ -68,6 +68,7 @@ export default function LiveStreamInfo({
                             <ThumbsUp className="w-[18px] h-[18px]" />
                             <span className="text-sm font-medium">Like</span>
                         </button>
+
                         <button className="px-4 h-full hover:bg-[#3F3F3F] rounded-r-full transition-colors cursor-pointer">
                             <ThumbsUp className="w-[18px] h-[18px] rotate-180" />
                         </button>

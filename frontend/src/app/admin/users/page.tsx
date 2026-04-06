@@ -102,6 +102,7 @@ export default function AdminUsersPage() {
                                     <td className="p-5 flex items-center gap-4">
                                         <Avatar className="h-10 w-10">
                                             <AvatarImage src={user.avatarUrl} />
+
                                             <AvatarFallback className="bg-purple-600 text-white font-medium">
                                                 {user.username[0].toUpperCase()}
                                             </AvatarFallback>
@@ -183,7 +184,9 @@ export default function AdminUsersPage() {
                         >
                             Previous
                         </button>
+
                         <span className="px-4 py-2 text-[#AAAAAA] text-sm flex items-center">Page {page}</span>
+
                         <button
                             disabled={page * data.pageSize >= data.total}
                             onClick={() => setPage(p => p + 1)}

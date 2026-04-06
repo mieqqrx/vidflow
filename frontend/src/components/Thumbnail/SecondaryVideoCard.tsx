@@ -13,10 +13,9 @@ export interface SecondaryVideoProps {
     channelName: string;
     views: string | number;
     postedAt: string;
-    watchedPercent?: number; // <-- Добавили пропс для процентов
+    watchedPercent?: number;
 }
 
-// Функция форматирования времени (та же логика, что в VideoCard)
 const formatDuration = (time: string | number | undefined) => {
     if (!time) return null;
     if (typeof time === "string") return time;
@@ -27,18 +26,18 @@ const formatDuration = (time: string | number | undefined) => {
 };
 
 export default function SecondaryVideoCard({
-                                               id,
-                                               thumbnail,
-                                               duration,
-                                               title,
-                                               channelId,
-                                               channelName,
-                                               views,
-                                               postedAt,
-                                               watchedPercent // <-- Принимаем его
-                                           }: SecondaryVideoProps) {
+   id,
+   thumbnail,
+   duration,
+   title,
+   channelId,
+   channelName,
+   views,
+   postedAt,
+   watchedPercent
+}: SecondaryVideoProps) {
     const formattedViews = typeof views === "number" ? views.toLocaleString() : views;
-    const formattedDuration = formatDuration(duration); // Применяем форматирование
+    const formattedDuration = formatDuration(duration);
 
     return (
         <div className="flex gap-2 group pr-2 w-full">
@@ -49,14 +48,12 @@ export default function SecondaryVideoCard({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                 />
 
-                {/* Плашка времени появляется только если есть данные  */}
                 {formattedDuration && (
                     <div className="absolute bottom-1.5 right-1 bg-black/80 px-1 py-0.5 rounded-[4px] text-[10px] font-medium text-white tracking-wide z-10">
                         {formattedDuration}
                     </div>
                 )}
 
-                {/* --- САМ КРАСНЫЙ ПОЛЗУНОК --- */}
                 {watchedPercent !== undefined && watchedPercent > 0 && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#aaaaaa]/30 z-10">
                         <div

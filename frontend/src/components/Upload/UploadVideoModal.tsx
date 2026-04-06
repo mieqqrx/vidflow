@@ -105,14 +105,17 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                         <div className="w-32 h-32 rounded-full bg-[#1F1F1F] flex items-center justify-center mb-6">
                             <Upload className={`w-12 h-12 text-[#AAAAAA] ${isDragging ? "animate-bounce text-[#3ea6ff]" : ""}`} />
                         </div>
+
                         <h3 className="text-[20px] text-white mb-2 font-medium">Drag and drop video files to upload</h3>
                         <p className="text-[#AAAAAA] text-[13px] mb-8">Your videos will be private until you publish them.</p>
+
                         <Button
                             onClick={() => fileInputRef.current?.click()}
                             className="bg-[#3ea6ff] hover:bg-[#6ebcff] text-black font-medium px-6 py-5 rounded-sm text-sm"
                         >
                             SELECT FILES
                         </Button>
+
                         <input type="file" ref={fileInputRef} onChange={(e) => handleFileSelect(e.target.files![0])} accept="video/*" className="hidden" />
                     </div>
                 )}
@@ -122,6 +125,7 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                         <div className="flex-1 p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-[#AAAAAA] mb-2">Title (required)</label>
+
                                 <input
                                     type="text"
                                     value={title}
@@ -130,6 +134,7 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                                     className="w-full bg-transparent border border-[#AAAAAA] rounded-md px-4 py-3 text-white focus:outline-none focus:border-[#3ea6ff] transition-colors"
                                 />
                             </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-[#AAAAAA] mb-2">Description</label>
                                 <textarea
@@ -140,14 +145,17 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                                     className="w-full bg-transparent border border-[#AAAAAA] rounded-md px-4 py-3 text-white focus:outline-none focus:border-[#3ea6ff] transition-colors resize-none"
                                 />
                             </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-[#AAAAAA] mb-2">Category</label>
+
                                 <select
                                     value={categoryId}
                                     onChange={(e) => setCategoryId(e.target.value)}
                                     className="w-full bg-[#1F1F1F] border border-[#AAAAAA] rounded-md px-4 py-3 text-white focus:outline-none focus:border-[#3ea6ff]"
                                 >
                                     <option value="" disabled>Select a category</option>
+
                                     {categories.map((cat) => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
@@ -159,6 +167,7 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                             <div className="aspect-video w-full bg-[#0F0F0F] rounded-md flex items-center justify-center mb-4">
                                 <FileVideo className="w-12 h-12 text-[#AAAAAA]" />
                             </div>
+
                             <div className="text-sm w-full">
                                 <span className="text-[#AAAAAA]">Filename</span>
                                 <p className="text-white truncate mt-1">{selectedFile?.name}</p>
@@ -175,6 +184,7 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                                     <Loader2 className="w-24 h-24 text-[#3ea6ff] animate-spin absolute inset-0" />
                                     <FileVideo className="w-10 h-10 text-white absolute inset-0 m-auto" />
                                 </div>
+
                                 <h3 className="text-xl text-white font-medium mb-2">Uploading your video...</h3>
                                 <p className="text-[#AAAAAA]">Please keep this window open until upload is complete.</p>
                             </>

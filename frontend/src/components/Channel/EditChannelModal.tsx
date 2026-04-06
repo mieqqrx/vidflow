@@ -102,6 +102,7 @@ export default function EditChannelModal({ isOpen, onClose, channel, videos }: E
 
                 <div className="flex items-center justify-between p-6 border-b border-[#3F3F3F]">
                     <h2 className="text-xl font-bold text-white">Channel customization</h2>
+
                     <button onClick={onClose} className="p-2 hover:bg-[#3F3F3F] rounded-full transition-colors text-white">
                         <X className="w-5 h-5" />
                     </button>
@@ -115,6 +116,7 @@ export default function EditChannelModal({ isOpen, onClose, channel, videos }: E
                         Layout
                         {activeTab === "layout" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3ea6ff]" />}
                     </button>
+
                     <button
                         onClick={() => setActiveTab("branding")}
                         className={`py-3 text-sm font-medium transition-colors relative ${activeTab === "branding" ? "text-[#3ea6ff]" : "text-[#AAAAAA] hover:text-white"}`}
@@ -122,6 +124,7 @@ export default function EditChannelModal({ isOpen, onClose, channel, videos }: E
                         Branding
                         {activeTab === "branding" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3ea6ff]" />}
                     </button>
+
                     <button
                         onClick={() => setActiveTab("basic")}
                         className={`py-3 text-sm font-medium transition-colors relative ${activeTab === "basic" ? "text-[#3ea6ff]" : "text-[#AAAAAA] hover:text-white"}`}
@@ -151,6 +154,7 @@ export default function EditChannelModal({ isOpen, onClose, channel, videos }: E
                                             className="w-full bg-[#272727] text-white border border-[#3F3F3F] rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#3ea6ff] appearance-none cursor-pointer"
                                         >
                                             <option value="">-- Do not feature any video --</option>
+
                                             {videos.map((vid) => (
                                                 <option key={vid.id} value={vid.id}>
                                                     {vid.title}
@@ -214,6 +218,7 @@ export default function EditChannelModal({ isOpen, onClose, channel, videos }: E
                                         ) : (
                                             <div className="w-full h-full bg-gradient-to-r from-purple-900/40 to-blue-900/40" />
                                         )}
+
                                         <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Upload className="w-6 h-6 text-white mb-1" />
                                             <span className="text-white text-sm font-medium">Upload banner</span>

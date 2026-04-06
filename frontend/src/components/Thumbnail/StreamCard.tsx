@@ -13,7 +13,6 @@ interface StreamCardProps {
 export default function StreamCard({ stream }: StreamCardProps) {
     const [imgError, setImgError] = useState(false);
 
-    // Используем enum для строгой и читаемой проверки
     const isLive = stream.status === LiveStreamStatus.Live;
     const isScheduled = stream.status === LiveStreamStatus.Scheduled;
     const isEnded = stream.status === LiveStreamStatus.Ended;
@@ -68,6 +67,7 @@ export default function StreamCard({ stream }: StreamCardProps) {
                 <h3 className="text-[14px] font-medium text-white line-clamp-2 group-hover:text-[#3ea6ff] transition-colors leading-tight">
                     {stream.title}
                 </h3>
+
                 <div className="text-[12px] text-[#AAAAAA] mt-1.5 flex flex-col gap-0.5">
                     {isLive ? (
                         <span className="text-[#CC0000] font-medium flex items-center gap-1">
@@ -78,6 +78,7 @@ export default function StreamCard({ stream }: StreamCardProps) {
                     ) : (
                         <span>Streamed {timeAgo}</span>
                     )}
+
                     <span className="text-[12px]">{stream.totalViewsCount?.toLocaleString() || 0} views</span>
                 </div>
             </div>

@@ -210,7 +210,6 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
     return (
         <div className="flex justify-center w-full h-full max-h-[100vh] sm:h-[calc(100vh-100px)] sm:max-h-[850px]">
             <div className="flex h-full w-full sm:w-auto relative justify-center">
-
                 <div className="relative w-full sm:w-[450px] h-full bg-black sm:rounded-2xl overflow-hidden shadow-2xl group shrink-0">
                     <div
                         className="absolute inset-0 bg-cover bg-center opacity-30 blur-2xl"
@@ -243,6 +242,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                         <button onClick={toggleMute} className="p-2.5 text-white rounded-full transition-colors outline-none drop-shadow-lg">
                             {isMuted || volume === 0 ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
                         </button>
+
                         <div className="w-0 overflow-hidden transition-all duration-300 group-hover/vol:w-20 flex items-center opacity-0 group-hover/vol:opacity-100">
                             <input
                                 type="range"
@@ -265,6 +265,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                                         <AvatarFallback className="bg-purple-600 text-[12px]">{short.channelName?.[0]}</AvatarFallback>
                                     </Avatar>
                                 </Link>
+
                                 <Link href={`/channel/${short.channelId}`} className="font-semibold text-white text-[15px] hover:text-[#aaaaaa] transition-colors drop-shadow-lg">
                                     @{short.channelName}
                                 </Link>
@@ -278,6 +279,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                                     </button>
                                 )}
                             </div>
+
                             <h2 className="text-white text-[15px] font-medium line-clamp-2 drop-shadow-lg pointer-events-auto">
                                 {short.title}
                             </h2>
@@ -294,6 +296,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                     <div className={`absolute bottom-0 left-0 right-0 bg-[#212121] z-50 rounded-t-2xl flex flex-col transition-transform duration-300 ease-in-out ${isCommentsOpen ? "translate-y-0" : "translate-y-full"} h-[70%]`}>
                         <div className="flex items-center justify-between p-4 border-b border-[#3f3f3f]">
                             <h3 className="text-white font-bold">Comments <span className="text-[#aaaaaa] font-normal text-sm ml-1">{short.commentsCount}</span></h3>
+
                             <button onClick={() => setIsCommentsOpen(false)} className="text-white hover:bg-white/10 p-1.5 rounded-full transition-colors">
                                 <X className="w-6 h-6" />
                             </button>
@@ -321,6 +324,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
                             />
+
                             <button type="submit" disabled={!commentText.trim() || isSubmittingComment} className="p-2 text-[#3ea6ff] disabled:text-[#3f3f3f] transition-colors">
                                 {isSubmittingComment ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                             </button>
@@ -333,6 +337,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                         <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/40 sm:bg-[#272727] group-hover:bg-black/60 sm:group-hover:bg-[#3f3f3f] transition-colors backdrop-blur-sm sm:backdrop-blur-none">
                             <ThumbsUp className={`w-6 h-6 transition-all ${interactionState.isLiked ? 'text-white fill-white' : 'text-white fill-transparent'}`} />
                         </div>
+
                         <span className="text-white text-[13px] font-medium drop-shadow-md sm:drop-shadow-none">{formatCount(interactionState.likesCount)}</span>
                     </button>
 
@@ -340,6 +345,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                         <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/40 sm:bg-[#272727] group-hover:bg-black/60 sm:group-hover:bg-[#3f3f3f] transition-colors backdrop-blur-sm sm:backdrop-blur-none">
                             <ThumbsDown className={`w-6 h-6 transition-all ${interactionState.isDisliked ? 'text-white fill-white' : 'text-white fill-transparent'}`} />
                         </div>
+
                         <span className="text-white text-[13px] font-medium drop-shadow-md sm:drop-shadow-none">Dislike</span>
                     </button>
 
@@ -347,6 +353,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                         <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/40 sm:bg-[#272727] group-hover:bg-black/60 sm:group-hover:bg-[#3f3f3f] transition-colors backdrop-blur-sm sm:backdrop-blur-none">
                             <MessageSquare className="w-6 h-6 text-white fill-transparent group-hover:fill-white transition-all" />
                         </div>
+
                         <span className="text-white text-[13px] font-medium drop-shadow-md sm:drop-shadow-none">{formatCount(short.commentsCount)}</span>
                     </button>
 
@@ -354,6 +361,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
                         <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/40 sm:bg-[#272727] group-hover:bg-black/60 sm:group-hover:bg-[#3f3f3f] transition-colors backdrop-blur-sm sm:backdrop-blur-none">
                             <Share2 className="w-6 h-6 text-white" />
                         </div>
+
                         <span className="text-white text-[13px] font-medium drop-shadow-md sm:drop-shadow-none">Share</span>
                     </button>
 

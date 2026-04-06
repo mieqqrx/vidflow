@@ -50,12 +50,14 @@ export default function StudioContentPage() {
                     >
                         Videos
                     </div>
+
                     <div
                         onClick={() => setActiveTab("shorts")}
                         className={`pb-3 cursor-pointer transition-colors ${activeTab === "shorts" ? "border-b-2 border-white font-medium" : "text-[#aaaaaa] hover:text-white"}`}
                     >
                         Shorts
                     </div>
+
                     <div
                         onClick={() => setActiveTab("live")}
                         className={`pb-3 cursor-pointer transition-colors ${activeTab === "live" ? "border-b-2 border-white font-medium flex items-center gap-2" : "text-[#aaaaaa] hover:text-white flex items-center gap-2"}`}

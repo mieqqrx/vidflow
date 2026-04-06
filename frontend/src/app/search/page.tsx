@@ -236,6 +236,7 @@ function SearchResultsContent() {
                         >
                             <div className="flex items-center justify-between p-6 pb-4 border-b border-[#3F3F3F]/50">
                                 <h2 className="text-[18px] font-bold text-white">Search filters</h2>
+
                                 <button
                                     onClick={() => setIsFilterModalOpen(false)}
                                     className="p-2 hover:bg-[#3F3F3F] rounded-full transition-colors text-white cursor-pointer"
@@ -249,6 +250,7 @@ function SearchResultsContent() {
                                     <h4 className="text-[13px] font-medium text-white uppercase border-b border-[#3F3F3F] pb-3">
                                         Duration
                                     </h4>
+
                                     <div className="flex flex-col gap-5">
                                         <FilterItem label="Under 4 minutes" active={duration === "short"} onClick={() => setDuration(duration === "short" ? "any" : "short")} />
                                         <FilterItem label="4 - 20 minutes" active={duration === "medium"} onClick={() => setDuration(duration === "medium" ? "any" : "medium")} />
@@ -260,6 +262,7 @@ function SearchResultsContent() {
                                     <h4 className="text-[13px] font-medium text-white uppercase border-b border-[#3F3F3F] pb-3">
                                         Features
                                     </h4>
+
                                     <div className="flex flex-col gap-5">
                                         <FilterItem label="Safe Search" active={safeSearch} onClick={() => setSafeSearch(!safeSearch)} />
                                     </div>
@@ -269,6 +272,7 @@ function SearchResultsContent() {
                                     <h4 className="text-[13px] font-medium text-white uppercase border-b border-[#3F3F3F] pb-3">
                                         Sort by
                                     </h4>
+
                                     <div className="flex flex-col gap-5">
                                         <FilterItem label="Relevance" active={sortBy === 0} onClick={() => setSortBy(0)} />
                                         <FilterItem label="Upload date" active={sortBy === 3} onClick={() => setSortBy(3)} />
@@ -318,6 +322,7 @@ function SearchResultsContent() {
                                         alt={video.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
+
                                     <div className="absolute bottom-1.5 right-1.5 bg-black/80 px-1.5 py-0.5 rounded text-xs font-medium text-white backdrop-blur-sm">
                                         {formatDuration(video.durationSeconds)}
                                     </div>

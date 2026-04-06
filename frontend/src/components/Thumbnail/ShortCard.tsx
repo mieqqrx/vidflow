@@ -41,6 +41,7 @@ export default function ShortCard({ id, thumbnail, title, views }: ShortCardProp
                             {title}
                         </h3>
                     </Link>
+
                     <span className="text-[#AAAAAA] text-[12px] sm:text-[13px] mt-1">
                         {formatViews(views)}
                     </span>
@@ -51,6 +52,7 @@ export default function ShortCard({ id, thumbnail, title, views }: ShortCardProp
                         e.preventDefault();
                         e.stopPropagation();
                     }}
+
                     className="text-white opacity-0 group-hover:opacity-100 p-1.5 -mt-1 -mr-2 rounded-full hover:bg-[#272727] transition-all shrink-0"
                 >
                     <MoreVertical className="w-4 h-4" />

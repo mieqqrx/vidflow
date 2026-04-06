@@ -88,7 +88,6 @@ export default function VideoCard({
                 {!hideAvatar && (
                     <Link href={`/channel/${channelId}`} className="shrink-0 mt-0.5">
                         <Avatar className="h-9 w-9 rounded-full">
-                            {/* ИСПОЛЬЗУЕМ fixUrl ЗДЕСЬ */}
                             <AvatarImage src={fixUrl(channelAvatar) || undefined} />
 
                             <AvatarFallback className="bg-purple-600 text-xs text-white">

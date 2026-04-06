@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 import { useGetVideoByIdQuery, useUpdateVideoDetailsMutation } from "@/store/api";
-// Импортируем сам компонент и его тип данных (Payload)
 import VideoDetailsForm, { VideoDetailsUpdatePayload } from "@/components/Studio/VideoDetailsForm";
 import VideoTrimmer from "@/components/Studio/VideoTrimmer";
 
@@ -22,11 +21,8 @@ export default function VideoEditorPage() {
 
     const [updateDetails, { isLoading: isUpdating }] = useUpdateVideoDetailsMutation();
 
-    // Теперь мы принимаем готовый объект из компонента формы, а не сырой FormData
     const handleSaveDetails = async (payload: VideoDetailsUpdatePayload) => {
         try {
-            // Передаем id и весь payload в RTK Query.
-            // Твоя мутация в apiSlice сама соберет из этого FormData для отправки на бэкенд!
             await updateDetails({
                 id: videoId,
                 ...payload
