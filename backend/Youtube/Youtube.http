@@ -1,6 +1,0 @@
-@Youtube_HostAddress = http://localhost:5103
-
-GET {{Youtube_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

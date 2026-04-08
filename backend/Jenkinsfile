@@ -13,8 +13,8 @@ pipeline {
         stage('Restore & Build') {
             steps {
                 dir('backend') {
-                    sh "dotnet restore Youtube.slnx"
-                    sh "dotnet build Youtube.slnx --configuration Release"
+                    sh "dotnet restore VidFlow.slnx"
+                    sh "dotnet build VidFlow.slnx --configuration Release"
                 }
             }
         }
@@ -22,7 +22,7 @@ pipeline {
         stage('Run Tests & Report') {
             steps {
                 dir('backend') {
-                    sh "dotnet test Youtube.Tests/Youtube.Tests.csproj --no-build --configuration Release --logger \"trx;LogFileName=test-results.xml\""
+                    sh "dotnet test VidFlow.Tests/VidFlow.Tests.csproj --no-build --configuration Release --logger \"trx;LogFileName=test-results.xml\""
                 }
             }
         }

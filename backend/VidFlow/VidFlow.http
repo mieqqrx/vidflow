@@ -1,0 +1,6 @@
+@VidFlow_HostAddress = http://localhost:5103
+
+GET {{VidFlow_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

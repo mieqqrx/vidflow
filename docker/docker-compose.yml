@@ -1,9 +1,9 @@
 services:
   postgres:
     image: postgres:16
-    container_name: youtube_postgres
+    container_name: vidflow_postgres
     environment:
-      POSTGRES_DB: youtubedb
+      POSTGRES_DB: vidflowdb
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
@@ -14,7 +14,7 @@ services:
 
   minio:
     image: minio/minio
-    container_name: youtube_minio
+    container_name: vidflow_minio
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -28,7 +28,7 @@ services:
 
   minio-setup:
     image: minio/mc
-    container_name: youtube_minio_setup
+    container_name: vidflow_minio_setup
     depends_on:
       - minio
     environment:
@@ -54,13 +54,13 @@ services:
 
   elasticsearch:
     image: elasticsearch:9.3.1
-    container_name: youtube_elasticsearch
+    container_name: vidflow_elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.http.ssl.enabled=false
       - ES_JAVA_OPTS=-Xms2g -Xmx2g
-      - cluster.name=youtube-cluster
+      - cluster.name=vidflow-cluster
       - bootstrap.memory_lock=true
     ulimits:
       memlock:
@@ -82,7 +82,7 @@ services:
 
   kibana:
     image: kibana:9.3.1
-    container_name: youtube_kibana
+    container_name: vidflow_kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
@@ -94,7 +94,7 @@ services:
 
   nginx-rtmp:
     image: tiangolo/nginx-rtmp
-    container_name: youtube_nginx_rtmp
+    container_name: vidflow_nginx_rtmp
     ports:
       - "1935:1935"   
       - "8080:8080"   
@@ -106,9 +106,9 @@ services:
 
   api:
     build:
-      context: ../backend/Youtube
+      context: ../backend/VidFlow
       dockerfile: Dockerfile
-    container_name: youtube_api
+    container_name: vidflow_api
     depends_on:
       postgres:
         condition: service_started
@@ -120,7 +120,7 @@ services:
         condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Host=postgres;Database=youtubedb;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=vidflowdb;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       - MinIO__Endpoint=http://minio:9000
       - MinIO__AccessKey=${MINIO_ROOT_USER}
       - MinIO__SecretKey=${MINIO_ROOT_PASSWORD}
