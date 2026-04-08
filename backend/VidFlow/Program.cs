@@ -84,15 +84,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 {
                     context.Token = token;
                 }
-                else
-                {
-                    var firstSession = context.Request.Cookies
-                        .FirstOrDefault(c => c.Key.StartsWith("token_"));
-                    if (!firstSession.Equals(default(KeyValuePair<string, string>)))
-                    {
-                        context.Token = firstSession.Value;
-                    }
-                }
 
                 return Task.CompletedTask;
             }
