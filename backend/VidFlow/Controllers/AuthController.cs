@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
 
-        return Ok(new { message = "Login successful" });
+        return Ok(new { message = "Login successful", token = token, userId = userId });
     }
 
     [Authorize]
@@ -197,7 +197,7 @@ public class AuthController : ControllerBase
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 
-            return Ok(new { message = "Login successful" });
+            return Ok(new { message = "Login successful", token = token, userId = userId });
         }
         catch
         {
