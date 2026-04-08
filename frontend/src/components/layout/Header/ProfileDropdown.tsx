@@ -66,12 +66,7 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
     const handleLogout = async () => {
         try {
             await logout().unwrap();
-            const remainingSessions = sessions.filter(s => s.id !== user.id);
-            if (remainingSessions.length > 0) {
-                dispatch(setActiveUser(remainingSessions[0].id));
-            } else {
-                dispatch(clearActiveUser());
-            }
+            dispatch(clearActiveUser());
             window.location.href = "/";
         } catch (error) {
             console.error("Error to logout", error);

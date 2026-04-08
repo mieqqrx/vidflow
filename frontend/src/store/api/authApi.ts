@@ -1,7 +1,6 @@
 import { apiSlice } from "./apiSlice";
 import { AuthResponse, LoginRequest, RegisterRequest, User, UpdateUserSettingsDto } from "@/types";
 
-// Добавляем интерфейс для сессий
 export interface SessionUser {
     id: string;
     username: string;
@@ -17,7 +16,6 @@ export const authApi = apiSlice.injectEndpoints({
                 method: "POST",
                 body: credentials,
             }),
-            // Инвалидируем Sessions, чтобы список аккаунтов обновился
             invalidatesTags: ["User", "Channel", "Sessions"],
         }),
 
@@ -29,14 +27,13 @@ export const authApi = apiSlice.injectEndpoints({
             async onQueryStarted(args, { dispatch, queryFulfilled }) {
                 try {
                     await queryFulfilled;
-                    dispatch(apiSlice.util.resetApiState()); // Очищаем весь кэш
+                    dispatch(apiSlice.util.resetApiState());
                 } catch (err) {
                     console.error("Error to logout", err);
                 }
             },
         }),
 
-        // НОВЫЙ ЭНДПОИНТ: Выход из всех аккаунтов
         logoutAll: builder.mutation<void, void>({
             query: () => ({
                 url: "/auth/logout-all",
@@ -45,7 +42,7 @@ export const authApi = apiSlice.injectEndpoints({
             async onQueryStarted(args, { dispatch, queryFulfilled }) {
                 try {
                     await queryFulfilled;
-                    dispatch(apiSlice.util.resetApiState()); // Очищаем весь кэш
+                    dispatch(apiSlice.util.resetApiState());
                 } catch (err) {
                     console.error("Error to logout all", err);
                 }
@@ -58,6 +55,7 @@ export const authApi = apiSlice.injectEndpoints({
                 method: "POST",
                 body: userData,
             }),
+            invalidatesTags: ["User", "Channel", "Sessions"],
         }),
 
         googleLogin: builder.mutation<{ message: string }, { idToken: string }>({
@@ -74,7 +72,6 @@ export const authApi = apiSlice.injectEndpoints({
             providesTags: ["User", "Channel"],
         }),
 
-        // НОВЫЙ ЭНДПОИНТ: Получение всех активных сессий
         getSessions: builder.query<SessionUser[], void>({
             query: () => "/auth/sessions",
             providesTags: ["Sessions"],

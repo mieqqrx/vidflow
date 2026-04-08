@@ -4,6 +4,7 @@ import React, { useState, useRef } from "react";
 import { Upload, X, Loader2, FileVideo, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetCategoriesQuery, useUploadVideoMutation } from "@/store/api";
+import { toast } from "sonner";
 
 interface UploadVideoModalProps {
     isOpen: boolean;
@@ -28,7 +29,7 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
 
     const handleFileSelect = (file: File) => {
         if (!file.type.startsWith("video/")) {
-            alert("Please select a video file");
+            toast.error("Please select a valid video file.");
             return;
         }
         setSelectedFile(file);
@@ -49,12 +50,17 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
             setStep(3);
             await uploadVideo(formData).unwrap();
 
+            toast.success("Video uploaded successfully!");
+
             setTimeout(() => {
                 handleCloseModal();
             }, 1500);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to upload video:", error);
             setStep(2);
+
+            const errorMessage = error?.data?.message || "Failed to upload video. Please try again.";
+            toast.error(errorMessage);
         }
     };
 

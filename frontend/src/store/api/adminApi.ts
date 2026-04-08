@@ -43,6 +43,7 @@ export const adminApi = apiSlice.injectEndpoints({
             },
             providesTags: ["Video"],
         }),
+
         deleteAdminVideo: builder.mutation<{ message: string }, string>({
             query: (id) => ({
                 url: `/admin/videos/${id}`,
@@ -50,6 +51,7 @@ export const adminApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ["Video", "Channel"],
         }),
+
         setAdminVideoVisibility: builder.mutation<{ message: string }, { id: string; visibility: VideoVisibility }>({
             query: ({ id, visibility }) => ({
                 url: `/admin/videos/${id}/visibility`,
