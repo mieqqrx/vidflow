@@ -3,8 +3,10 @@
 import React, { useState, useRef } from "react";
 import { Upload, X, Loader2, FileVideo, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useGetCategoriesQuery, useUploadVideoMutation } from "@/store/api";
+import { useGetCategoriesQuery } from "@/store/api";
+import { useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
+import axios from "axios";
 
 interface UploadVideoModalProps {
     isOpen: boolean;
@@ -20,9 +22,12 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
     const [description, setDescription] = useState("");
     const [categoryId, setCategoryId] = useState("");
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isFinished, setIsFinished] = useState(false);
 
-    const [uploadVideo, { isLoading: isUploading }] = useUploadVideoMutation();
+    const activeUserId = useAppSelector((state) => state.auth.activeUserId);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { data: categories = [] } = useGetCategoriesQuery();
 
     if (!isOpen) return null;
@@ -37,6 +42,31 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
         setStep(2);
     };
 
+    const checkProcessingStatus = async (videoId: string) => {
+        try {
+            await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/videos/${videoId}`, {
+                withCredentials: true,
+                headers: { "X-Active-User": activeUserId || "" }
+            });
+
+            setIsProcessing(false);
+            setIsFinished(true);
+            toast.success("Video processed and published successfully!");
+
+            setTimeout(() => {
+                handleCloseModal();
+            }, 3000);
+        } catch (error: any) {
+            if (error.response?.status === 404) {
+                setTimeout(() => checkProcessingStatus(videoId), 3000);
+            } else {
+                setIsProcessing(false);
+                toast.error("An error occurred during processing.");
+                setStep(2);
+            }
+        }
+    };
+
     const handleUpload = async () => {
         if (!selectedFile) return;
 
@@ -48,18 +78,40 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
 
         try {
             setStep(3);
-            await uploadVideo(formData).unwrap();
+            setUploadProgress(0);
+            setIsProcessing(false);
+            setIsFinished(false);
 
-            toast.success("Video uploaded successfully!");
+            const uploadRes = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/videos/upload`,
+                formData,
+                {
+                    withCredentials: true,
+                    headers: { "X-Active-User": activeUserId || "" },
+                    onUploadProgress: (progressEvent) => {
+                        if (progressEvent.total) {
+                            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                            setUploadProgress(percent);
+                        }
+                    },
+                }
+            );
 
-            setTimeout(() => {
-                handleCloseModal();
-            }, 1500);
+            setIsProcessing(true);
+            setUploadProgress(100);
+
+            const videoId = uploadRes.data.videoId;
+
+            if (videoId) {
+                checkProcessingStatus(videoId);
+            } else {
+                throw new Error("No videoId returned from server");
+            }
+
         } catch (error: any) {
             console.error("Failed to upload video:", error);
             setStep(2);
-
-            const errorMessage = error?.data?.message || "Failed to upload video. Please try again.";
+            const errorMessage = error.response?.data?.message || "Failed to upload video. Please try again.";
             toast.error(errorMessage);
         }
     };
@@ -70,6 +122,9 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
         setTitle("");
         setDescription("");
         setCategoryId("");
+        setUploadProgress(0);
+        setIsProcessing(false);
+        setIsFinished(false);
         onClose();
     };
 
@@ -79,12 +134,6 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                 className="bg-[#282828] w-full max-w-[900px] h-[600px] rounded-xl shadow-2xl flex flex-col relative overflow-hidden animate-in fade-in zoom-in-95 duration-200"
                 onClick={(e) => e.stopPropagation()}
             >
-                {isUploading && (
-                    <div className="absolute top-[60px] left-0 w-full h-1 bg-[#3F3F3F] overflow-hidden z-10">
-                        <div className="h-full bg-[#3ea6ff] animate-progress-indeterminate"></div>
-                    </div>
-                )}
-
                 <div className="flex items-center justify-between px-6 py-4 border-b border-[#3F3F3F]">
                     <h2 className="text-xl font-medium text-white">
                         {step === 1 ? "Upload video" : step === 2 ? "Details" : "Uploading..."}
@@ -92,8 +141,8 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
 
                     <button
                         onClick={handleCloseModal}
-                        disabled={isUploading}
-                        className="text-[#AAAAAA] hover:text-white transition-colors disabled:opacity-50"
+                        disabled={uploadProgress > 0 && !isFinished}
+                        className="text-[#AAAAAA] hover:text-white transition-colors disabled:opacity-50 cursor-pointer"
                     >
                         <X className="w-6 h-6" />
                     </button>
@@ -117,7 +166,7 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
 
                         <Button
                             onClick={() => fileInputRef.current?.click()}
-                            className="bg-[#3ea6ff] hover:bg-[#6ebcff] text-black font-medium px-6 py-5 rounded-sm text-sm"
+                            className="bg-[#3ea6ff] hover:bg-[#6ebcff] cursor-pointer text-black font-medium px-6 py-5 rounded-sm text-sm"
                         >
                             SELECT FILES
                         </Button>
@@ -131,7 +180,6 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                         <div className="flex-1 p-6 overflow-y-auto custom-scrollbar flex flex-col gap-6">
                             <div>
                                 <label className="block text-sm font-medium text-[#AAAAAA] mb-2">Title (required)</label>
-
                                 <input
                                     type="text"
                                     value={title}
@@ -154,14 +202,12 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
 
                             <div>
                                 <label className="block text-sm font-medium text-[#AAAAAA] mb-2">Category</label>
-
                                 <select
                                     value={categoryId}
                                     onChange={(e) => setCategoryId(e.target.value)}
                                     className="w-full bg-[#1F1F1F] border border-[#AAAAAA] rounded-md px-4 py-3 text-white focus:outline-none focus:border-[#3ea6ff]"
                                 >
                                     <option value="" disabled>Select a category</option>
-
                                     {categories.map((cat) => (
                                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                                     ))}
@@ -183,23 +229,37 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                 )}
 
                 {step === 3 && (
-                    <div className="flex-1 flex flex-col items-center justify-center p-10 animate-in fade-in duration-500">
-                        {isUploading ? (
-                            <>
-                                <div className="relative w-24 h-24 mb-6">
-                                    <Loader2 className="w-24 h-24 text-[#3ea6ff] animate-spin absolute inset-0" />
-                                    <FileVideo className="w-10 h-10 text-white absolute inset-0 m-auto" />
-                                </div>
-
-                                <h3 className="text-xl text-white font-medium mb-2">Uploading your video...</h3>
-                                <p className="text-[#AAAAAA]">Please keep this window open until upload is complete.</p>
-                            </>
+                    <div className="flex-1 flex flex-col items-center justify-center p-10">
+                        {isFinished ? (
+                            <div className="flex flex-col items-center animate-in zoom-in duration-300">
+                                <CheckCircle2 className="w-24 h-24 text-green-500 mb-6" />
+                                <h3 className="text-2xl text-white font-medium mb-2">Upload Complete!</h3>
+                                <p className="text-[#AAAAAA]">Your video is now live on the platform.</p>
+                            </div>
+                        ) : isProcessing ? (
+                            <div className="flex flex-col items-center">
+                                <Loader2 className="w-20 h-20 text-[#3ea6ff] animate-spin mb-6" />
+                                <h3 className="text-xl text-white font-medium mb-2">Processing Video...</h3>
+                                <p className="text-[#AAAAAA] text-center max-w-sm">
+                                    Generating HD formats. This might take a minute depending on video length.
+                                    <br/>Please do not close this window.
+                                </p>
+                            </div>
                         ) : (
-                            <>
-                                <CheckCircle2 className="w-24 h-24 text-green-500 mb-6 animate-in zoom-in duration-300" />
-                                <h3 className="text-xl text-white font-medium mb-2">Upload Complete!</h3>
-                                <p className="text-[#AAAAAA]">Your video is now being processed.</p>
-                            </>
+                            <div className="w-full max-w-md flex flex-col items-center">
+                                <FileVideo className="w-16 h-16 text-[#AAAAAA] mb-4" />
+                                <h3 className="text-2xl text-white font-medium mb-6">Uploading: {uploadProgress}%</h3>
+
+                                <div className="w-full h-3 bg-[#1F1F1F] rounded-full overflow-hidden mb-4 border border-[#3F3F3F]">
+                                    <div
+                                        className="h-full bg-[#3ea6ff] transition-all duration-300 relative"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <p className="text-[#AAAAAA] text-sm">Transferring file to secure servers...</p>
+                            </div>
                         )}
                     </div>
                 )}
@@ -208,8 +268,8 @@ export default function UploadVideoModal({ isOpen, onClose }: UploadVideoModalPr
                     <div className="px-6 py-4 flex justify-end border-t border-[#3F3F3F]">
                         <Button
                             onClick={handleUpload}
-                            disabled={isUploading || !title.trim() || !categoryId}
-                            className="bg-[#3ea6ff] hover:bg-[#6ebcff] text-black font-medium px-6 rounded-sm min-w-[100px]"
+                            disabled={!title.trim() || !categoryId}
+                            className="bg-[#3ea6ff] cursor-pointer hover:bg-[#6ebcff] text-black font-medium px-6 rounded-sm min-w-[100px]"
                         >
                             UPLOAD
                         </Button>

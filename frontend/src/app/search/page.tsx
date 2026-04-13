@@ -9,14 +9,18 @@ import {
     useGetSubscriptionsQuery,
     useToggleSubscriptionMutation,
     useUnsubscribeFromChannelMutation,
-    useToggleNotificationsMutation
+    useToggleNotificationsMutation,
+    useGetMeQuery
 } from "@/store/api";
 import { Loader2, Filter, Check, Bell, X } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+
 import { Channel, SearchChannelDocument, Subscription } from "@/types";
+import { fixUrl } from "@/utils/fixUrl";
 
 function formatDuration(seconds: number) {
     const m = Math.floor(seconds / 60);
@@ -64,11 +68,6 @@ function ChannelSearchItem({ channel, myChannel, subscriptions, router }: Channe
         e.preventDefault();
         e.stopPropagation();
 
-        if (!myChannel) {
-            router.push("/login");
-            return;
-        }
-
         try {
             if (isSubscribed) {
                 await unsubscribe(channel.id).unwrap();
@@ -92,23 +91,29 @@ function ChannelSearchItem({ channel, myChannel, subscriptions, router }: Channe
 
     return (
         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 py-4 border-b border-[#3F3F3F]/30 pb-6 w-full md:px-12">
-            <Link href={`/channel/${channel.id}`} className="w-[100px] h-[100px] md:w-[136px] md:h-[136px] rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-[#272727] cursor-pointer hover:opacity-90 transition-opacity">
-                {channel.ownerAvatarUrl ? (
-                    <img src={channel.ownerAvatarUrl} alt={channel.name} className="w-full h-full object-cover" />
-                ) : (
-                    <span className="text-4xl text-white font-medium">{channel.name?.[0]?.toUpperCase()}</span>
-                )}
+            <Link href={`/channel/${channel.id}`} className="shrink-0 cursor-pointer hover:opacity-90 transition-opacity">
+                <Avatar className="w-[100px] h-[100px] md:w-[136px] md:h-[136px] bg-[#272727]">
+                    <AvatarImage
+                        src={channel.ownerAvatarUrl && channel.ownerAvatarUrl !== "null" ? fixUrl(channel.ownerAvatarUrl) : undefined}
+                        className="object-cover"
+                    />
+                    <AvatarFallback className="text-4xl text-white font-medium bg-[#272727]">
+                        {channel.name?.[0]?.toUpperCase() || "C"}
+                    </AvatarFallback>
+                </Avatar>
             </Link>
 
             <div className="flex flex-col flex-1 text-center sm:text-left">
                 <Link href={`/channel/${channel.id}`} className="text-lg md:text-[22px] font-medium text-white hover:text-white/80 transition-colors">
                     {channel.name}
                 </Link>
+
                 <div className="text-[#AAAAAA] text-[13px] mt-1 mb-2 flex flex-wrap justify-center sm:justify-start gap-1">
                     <span>{`@${channel.name.toLowerCase().replace(/\s/g, '')}`}</span>
                     <span>•</span>
                     <span>{(channel.subscribersCount || 0).toLocaleString()} subscribers</span>
                 </div>
+
                 <p className="text-[#AAAAAA] text-[13px] line-clamp-1 max-w-[600px] hidden sm:block">
                     {channel.description || "No description available."}
                 </p>
@@ -178,10 +183,14 @@ function SearchResultsContent() {
     const [duration, setDuration] = useState<DurationFilter>("any");
     const [safeSearch, setSafeSearch] = useState<boolean>(false);
 
-    const { data: myChannel } = useGetMyChannelQuery();
+    const { data: user } = useGetMeQuery();
+
+    const { data: myChannel } = useGetMyChannelQuery(undefined, {
+        skip: !user
+    });
 
     const { data: subscriptions = [] } = useGetSubscriptionsQuery(undefined, {
-        skip: !myChannel
+        skip: !user
     });
 
     let minDuration: number | undefined = undefined;
@@ -214,7 +223,6 @@ function SearchResultsContent() {
     return (
         <div className="min-h-screen bg-[#0F0F0F] text-white pt-[72px] px-4 md:px-8 lg:px-12">
             <div className="max-w-[1096px] mx-auto py-6">
-
                 <div className="flex items-center justify-end pb-4 mb-2 border-b border-[#3F3F3F]/50">
                     <button
                         onClick={() => setIsFilterModalOpen(true)}
@@ -340,17 +348,15 @@ function SearchResultsContent() {
                                     </div>
 
                                     <div className="flex items-center gap-2 mb-3">
-                                        {video.channelAvatarUrl ? (
-                                            <img
-                                                src={video.channelAvatarUrl}
-                                                alt={video.channelName}
-                                                className="w-6 h-6 rounded-full object-cover shrink-0 bg-[#272727]"
+                                        <Avatar className="w-6 h-6 shrink-0 bg-[#272727]">
+                                            <AvatarImage
+                                                src={video.channelAvatarUrl && video.channelAvatarUrl !== "null" ? fixUrl(video.channelAvatarUrl) : undefined}
+                                                className="object-cover"
                                             />
-                                        ) : (
-                                            <div className="w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-                                                {video.channelName[0]?.toUpperCase()}
-                                            </div>
-                                        )}
+                                            <AvatarFallback className="bg-purple-600 text-[10px] font-bold text-white">
+                                                {video.channelName?.[0]?.toUpperCase() || "U"}
+                                            </AvatarFallback>
+                                        </Avatar>
                                         <span className="text-[#AAAAAA] text-[13px] md:text-xs hover:text-white transition-colors">
                                             {video.channelName}
                                         </span>
