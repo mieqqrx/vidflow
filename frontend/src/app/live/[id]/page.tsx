@@ -18,10 +18,12 @@ import { LiveStreamMessageDto, LiveStreamStatus } from "@/types/stream";
 import LiveStreamPlayer from "@/components/Stream/LiveStreamPlayer";
 import LiveStreamInfo from "@/components/Stream/LiveStreamInfo";
 import LiveStreamChat from "@/components/Stream/LiveStreamChat";
+import { useAppSelector } from "@/store/hooks";
 
 export default function LiveStreamPage() {
     const params = useParams();
     const streamId = params.id as string;
+    const activeUserId = useAppSelector((state) => state.auth.activeUserId);
 
     const { data: currentUser } = useGetMeQuery();
     const { data: initialMessages } = useGetLiveStreamMessagesQuery(streamId);
@@ -70,11 +72,8 @@ export default function LiveStreamPage() {
         const hubUrl = `${apiUrl.replace(/\/api\/?$/, '')}/hubs/livestream`;
 
         const newConnection = new signalR.HubConnectionBuilder()
-            .withUrl(hubUrl, {
-                accessTokenFactory: () => {
-                    const token = localStorage.getItem("token");
-                    return token ? token.replace(/^["']|["']$/g, '') : "";
-                }
+            .withUrl(`${hubUrl}?activeUserId=${activeUserId || ""}`, {
+                withCredentials: true
             })
             .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.None)
