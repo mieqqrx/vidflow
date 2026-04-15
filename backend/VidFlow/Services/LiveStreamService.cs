@@ -161,7 +161,7 @@ namespace VidFlow.Services
             stream.Status = LiveStreamStatus.Live;
             stream.StartedAt = isReconnect ? stream.StartedAt : DateTime.UtcNow;
 
-            stream.PlaybackUrl = $"http://26.192.139.137:8080/hls/{streamKey}.m3u8";
+            stream.PlaybackUrl = $"http://localhost:8080/hls/{streamKey}.m3u8";
 
             await _context.SaveChangesAsync();
 

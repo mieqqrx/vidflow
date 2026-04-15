@@ -64,7 +64,7 @@ export default function ShortPlayer({ short, isActive }: ShortPlayerProps) {
 
     const videoUrl = short.videoUrl
         ? fixUrl(short.videoUrl)
-        : `${process.env.NEXT_PUBLIC_MINIO_EXTERNAL_URL || 'http://26.192.139.137:9000'}/videos/${short.id}/short.mp4`;
+        : `${process.env.NEXT_PUBLIC_MINIO_EXTERNAL_URL || 'http://localhost:9000'}/videos/${short.id}/short.mp4`;
 
     const thumbnailUrl = fixUrl(short.thumbnailUrl);
     const avatarUrl = fixUrl(short.channelAvatarUrl);

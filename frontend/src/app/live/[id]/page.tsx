@@ -113,6 +113,7 @@ export default function LiveStreamPage() {
             await connection.invoke("SendMessage", streamId, newMessage);
             setNewMessage("");
         } catch (error) {
+            console.error("Failed to send message", error);
             toast.error("Failed to send message");
         }
     };
