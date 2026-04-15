@@ -38,6 +38,10 @@ namespace VidFlow.DTOs
         public string ChannelName { get; set; } = string.Empty;
         public string? ChannelAvatarUrl { get; set; }
         public Guid? VideoId { get; set; }
+        public int LikesCount { get; set; }
+        public int DislikesCount { get; set; }
+        public bool IsLiked { get; set; }
+        public bool IsDisliked { get; set; }
     }
 
     public class LiveStreamMessageDto

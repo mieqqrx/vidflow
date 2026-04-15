@@ -120,6 +120,77 @@ namespace VidFlow.Services
             return stream == null ? null : MapToDto(stream, stream.Channel);
         }
 
+        public async Task<(bool Success, string Message, bool IsLiked)> ToggleLikeAsync(Guid streamId, Guid userId)
+        {
+            var stream = await _context.LiveStreams
+                .Include(s => s.Interactions)
+                .FirstOrDefaultAsync(s => s.Id == streamId);
+
+            if (stream == null) return (false, "Stream not found", false);
+
+            var interaction = stream.Interactions.FirstOrDefault(i => i.UserId == userId);
+
+            if (interaction != null)
+            {
+                if (interaction.IsLike)
+                {
+                    _context.Remove(interaction);
+                    stream.LikesCount = Math.Max(0, stream.LikesCount - 1);
+                    await _context.SaveChangesAsync();
+                    return (true, "Like removed", false);
+                }
+                else
+                {
+                    interaction.IsLike = true;
+                    stream.DislikesCount = Math.Max(0, stream.DislikesCount - 1);
+                    stream.LikesCount++;
+                    await _context.SaveChangesAsync();
+                    return (true, "Like added", true);
+                }
+            }
+
+            stream.Interactions.Add(new LiveStreamInteraction { UserId = userId, StreamId = streamId, IsLike = true });
+            stream.LikesCount++;
+            await _context.SaveChangesAsync();
+            return (true, "Like added", true);
+        }
+
+        public async Task<(bool Success, string Message, bool IsDisliked)> ToggleDislikeAsync(Guid streamId, Guid userId)
+        {
+            var stream = await _context.LiveStreams
+                .Include(s => s.Interactions)
+                .FirstOrDefaultAsync(s => s.Id == streamId);
+
+            if (stream == null) return (false, "Stream not found", false);
+
+            var interaction = stream.Interactions.FirstOrDefault(i => i.UserId == userId);
+
+            if (interaction != null)
+            {
+                if (!interaction.IsLike)
+                {
+                    _context.Remove(interaction);
+                    stream.DislikesCount = Math.Max(0, stream.DislikesCount - 1);
+                    await _context.SaveChangesAsync();
+                    return (true, "Dislike removed", false);
+                }
+                else
+                {
+                    interaction.IsLike = false;
+                    stream.LikesCount = Math.Max(0, stream.LikesCount - 1);
+                    stream.DislikesCount++;
+                    await _context.SaveChangesAsync();
+                    return (true, "Dislike added", true);
+                }
+            }
+
+            stream.Interactions.Add(new LiveStreamInteraction { UserId = userId, StreamId = streamId, IsLike = false });
+            stream.DislikesCount++;
+            await _context.SaveChangesAsync();
+            return (true, "Dislike added", true);
+        }
+
+
         public async Task<IEnumerable<LiveStreamResponseDto>> GetLiveStreamsAsync()
         {
             var streams = await _context.LiveStreams

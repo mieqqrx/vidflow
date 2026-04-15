@@ -22,5 +22,8 @@ namespace VidFlow.Services
         Task ProcessRecordingAsync(Guid streamId, string filePath);
 
         Task<(bool Success, string Message)> UpdateThumbnailAsync(Guid streamId, Guid userId, IFormFile thumbnail);
+
+        Task<(bool Success, string Message, bool IsLiked)> ToggleLikeAsync(Guid streamId, Guid userId);
+        Task<(bool Success, string Message, bool IsDisliked)> ToggleDislikeAsync(Guid streamId, Guid userId);
     }
 }

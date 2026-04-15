@@ -23,6 +23,7 @@ public class AppDbContext : DbContext
     public DbSet<VideoReport> VideoReports { get; set; }
     public DbSet<LiveStream> LiveStreams { get; set; }
     public DbSet<LiveStreamMessage> LiveStreamMessages { get; set; }
+    public DbSet<LiveStreamInteraction> LiveStreamInteractions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

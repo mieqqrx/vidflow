@@ -41,6 +41,11 @@
         public Video? Video { get; set; }
 
         public ICollection<LiveStreamMessage> Messages { get; set; } = new List<LiveStreamMessage>();
+
+        public int LikesCount { get; set; }
+        public int DislikesCount { get; set; }
+        public ICollection<LiveStreamInteraction> Interactions { get; set; } = new List<LiveStreamInteraction>();
+
     }
 
     public class LiveStreamMessage

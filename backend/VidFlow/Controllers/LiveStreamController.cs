@@ -61,6 +61,29 @@ namespace VidFlow.Controllers
             return Ok(stream);
         }
 
+        [Authorize]
+        [HttpPost("{id}/like")]
+        public async Task<IActionResult> ToggleLike(Guid id)
+        {
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var (success, message, isLiked) = await _streamService.ToggleLikeAsync(id, userId);
+
+            if (!success) return BadRequest(new { message });
+            return Ok(new { message, isLiked }); 
+        }
+
+        [Authorize]
+        [HttpPost("{id}/dislike")]
+        public async Task<IActionResult> ToggleDislike(Guid id)
+        {
+            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var (success, message, isDisliked) = await _streamService.ToggleDislikeAsync(id, userId);
+
+            if (!success) return BadRequest(new { message });
+            return Ok(new { message, isDisliked }); 
+        }
+
+
         [HttpGet("live")]
         public async Task<IActionResult> GetLiveStreams()
         {
