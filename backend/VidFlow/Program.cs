@@ -79,6 +79,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 var activeUserId = context.Request.Headers["X-Active-User"].FirstOrDefault();
 
+                if (string.IsNullOrEmpty(activeUserId))
+                {
+                    activeUserId = context.Request.Query["activeUserId"].FirstOrDefault();
+                }
+
                 if (!string.IsNullOrEmpty(activeUserId) &&
                     context.Request.Cookies.TryGetValue($"token_{activeUserId}", out var token))
                 {
